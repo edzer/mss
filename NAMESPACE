@@ -1,3 +1,4 @@
+import(methods)
 importFrom(stats, aggregate)
 import(sp)
 import(gstat)
