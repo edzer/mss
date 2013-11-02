@@ -1,0 +1,12 @@
+importFrom(stats, aggregate)
+import(sp)
+import(gstat)
+
+exportClass(
+	GeostatisticalDataFrame,
+	PointPatternDataFrame,
+	LatticeDataFrame
+)
+
+S3method(aggregate, GeostatisticalDataFrame)
+S3method(aggregate, PointPatternDataFrame)
