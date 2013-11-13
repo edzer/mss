@@ -2,6 +2,7 @@ options(warn=1) # print warnings where they occur
 
 library(spatstat) # point patterns -- overwrites idw!
 library(maptools) # convert sp <--> spatstat classes
+library(mss)
 ##############################
 ### SECTION: demonstration scripts
 ##############################
@@ -9,7 +10,7 @@ library(maptools) # convert sp <--> spatstat classes
 ### 1. interpolate a pp; email EP->CS of 3/22/12
 data(longleaf)
 # loads long-leaved pinus data set: diameter at breast height
-plot(idw(longleaf),main="") # done by spatstat
+plot(spatstat::idw(longleaf),main="") # done by spatstat
 # inverse distance interpolation
 plot(longleaf, add = TRUE)
 ll = as(as(longleaf, "SpatialPointsDataFrame"), "PointPatternDataFrame")
@@ -38,7 +39,7 @@ meuse.win = as.owin(meuse.grid[1])
 meuse.win
 # plot a smoothed version of the marks:
 
-plot(idw(meuse.pp))
+plot(spatstat::idw(meuse.pp))
 # plot the mark correlation function:
 plot(markcorr(meuse.pp))
 # plot E(r) function, a diagnostics plot for dependence between the points and the marks.
