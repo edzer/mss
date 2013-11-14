@@ -62,7 +62,7 @@ box(col='grey')
 
 # PM10 
 # read Airbase PM10 data
-file = system.file("external/EU_meas_2005_june.csv", package="mss")[1]
+file = system.file("external/EU_meas_2005_june.dat", package="mss")[1]
 pm10.tab <- read.table(file, header = TRUE)
 pm10all = STIDF(SpatialPoints(pm10.tab[c("x", "y")]), as.POSIXct(as.Date(pm10.tab$time)), pm10.tab)
 pm10all = as(pm10all, "STSDF")
