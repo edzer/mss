@@ -1,0 +1,14 @@
+agree on a set of classes (OWL?)
+
+synchronize R class names with those in the OWL pattern
+
+take care of time, space, spacetime;
+
+take care of trajectories -- what if they measure ambient air
+temperature? -> coerce to ST Geostatistical variable?
+
+coercion ppp <--> PointPatternDataFrame
+
+document exported classes
+
+do all classes need ObservationWindows? (geost, lattice: no?)
