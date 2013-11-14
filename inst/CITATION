@@ -1,4 +1,6 @@
-@article{Stasch2014149,
+citHeader("To cite package mss in publications use:")
+
+citEntry(entry="Article",
  title = "Meaningful spatial prediction and aggregation ",
  journal = "Environmental Modelling & Software ",
  volume = "51",
@@ -8,9 +10,7 @@
  doi = "http://dx.doi.org/10.1016/j.envsoft.2013.09.006",
  url = "http://www.sciencedirect.com/science/article/pii/S1364815213001977",
  author = "Christoph Stasch and Simon Scheider and Edzer Pebesma and Werner Kuhn",
- keywords = "Meaningfulness",
- keywords = "Knowledge-based environmental modelling",
- keywords = "Spatial Statistics",
- keywords = "Spatial prediction",
- keywords = "Spatiotemporal aggregation "
-}
+ textVersion = paste("Stasch, C., S. Scheider, E. Pebesma, W. Kuhn, 2014.",
+	"Meaningful Spatial Prediction and Aggregation.",
+	"Environmental Modelling and Software, 51, 149--165")
+)
