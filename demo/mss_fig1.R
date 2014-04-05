@@ -24,8 +24,8 @@ file = system.file("external/co2_emission_powerplants.csv", package="mss")[1]
 co2all <- read.csv(file, header = TRUE)
 
 # filter power plants without locations (=zero latitudes) and with carbon dioxide emissions in 2008
-co2cleaned <- co2all[co2all$latitude != 0 & co2all$carbon_2007 != 0,]
-co2cleaned <- subset(co2cleaned,select=c("latitude","longitude","carbon_2007"))
+co2cleaned <- co2all[co2all$latitude != 0 & co2all$carbon_2007 != 0,
+		c("plant_id", "name", "latitude", "longitude", "carbon_2007")]
 
 # convert to spatial points dataframe
 coords <- cbind(co2cleaned$longitude,co2cleaned$latitude)
