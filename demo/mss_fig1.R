@@ -44,7 +44,7 @@ box(col='grey')
 
 # compute and plot aggregate (sum) of CO2 emissions
 plot(germany)
-co2agg <- aggregate(co2sp,germany,sum)
+co2agg <- aggregate(co2sp["carbon_2007"], germany, sum)
 plot(co2agg,add=TRUE)
 invisible(text(coordinates(co2agg), labels=as.character(co2agg$carbon_2007), cex=1.3))
 title(expression("Sum of CO"[2]*" emissions"))
