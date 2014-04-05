@@ -63,8 +63,11 @@ box(col='grey')
 # PM10 
 # read Airbase PM10 data
 file = system.file("external/EU_meas_2005_june.dat", package="mss")[1]
-pm10.tab <- read.table(file, header = TRUE)
-pm10all = STIDF(SpatialPoints(pm10.tab[c("x", "y")]), as.POSIXct(as.Date(pm10.tab$time)), pm10.tab)
+# since R 3.1, coordinates will be read as factor, because they otherwise loose precision;
+# hence, we need to specify colClasses
+cc = c("factor", "Date", "Date", "factor", "factor", "numeric", "numeric", "numeric")
+pm10.tab <- read.table(file, header = TRUE, colClasses = cc)
+pm10all = STIDF(SpatialPoints(pm10.tab[c("x", "y")]), as.POSIXct(pm10.tab$time), pm10.tab)
 pm10all = as(pm10all, "STSDF")
 pm10sel <- pm10all[,"2005-06-01"] #select only one day
 proj4string(pm10sel) <- proj4string(germany) #set crs of pm10 values
