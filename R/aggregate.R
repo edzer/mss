@@ -19,6 +19,6 @@ aggregate.GeostatisticalDataFrame = function(x, by, FUN = mean, ...) {
 #
 aggregate.PointPatternDataFrame = function(x, by, FUN = mean, ...) {
 	if (!is.sum(FUN))
-		warning("aggregation using a non-sum function is not considered meaningful for Point Pattern data")
+		warning("aggregation using a non-sum function may not be meaningful for Point Pattern data")
 	aggregate(as(x, "SpatialPointsDataFrame"), by, FUN, ...)
 }
