@@ -1,4 +1,5 @@
-####
+# the following classes are proof-of-concept, and are obsolete
+#
 # GeostatisticalDataFrame represents a geostatistical variable
 #
 setClass("GeostatisticalDataFrame", contains = "SpatialPointsDataFrame",

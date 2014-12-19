@@ -2,3 +2,4 @@ mss			meaningful spatial statistics demo script
 mss_fig1	replicate figure 1 in the meaningful spatial prediction and aggregation paper
 helper		helper functions (unused)
 to_pg		export results from demo(mss_fig1) to postgis, using rgdal
+reproduce	reproduce colour figure of AGU poster
