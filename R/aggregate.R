@@ -1,3 +1,13 @@
+#' check whether x equals function sum
+#'
+#' this function checks whether its argument equals function sum
+#' @param x the function to check
+#' @export
+#' @examples
+#' is.sum(sum)
+#' is.sum(sum(1:3))
+#' is.sum(mean)
+#' is.sum(function(x) sum(x))
 is.sum = function(x) {
 	paste(deparse(x), collapse="") == paste(deparse(sum),collapse="")
 }

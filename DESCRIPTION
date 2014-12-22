@@ -1,18 +1,15 @@
 Package: mss
-Version: 0.1-0
-Date: 2013-11-14
-Title: meaningful spatial statistics
+Title: Meaningful Spatial Statistics
+Description: classes and methods for meaningful spatial statistics
+Version: 0.2-0
+Date: 2014-12-19
 Authors@R: c(person("Edzer", "Pebesma", role = c("cre", "aut"),
-		email = "edzer.pebesma@uni-muenster.de"),
-	person("Christoph", "Stasch", role = "cre"))
-Depends: methods, sp (>= 0.9-89), gstat
+    email = "edzer.pebesma@uni-muenster.de"),
+    person("Christoph", "Stasch", role = "cre"))
+Depends: methods
+Imports: sp, gstat
 Suggests: rgeos, maptools, spatstat
 LazyData: yes
-Description: classes and methods for meaningful spatial statistics
-License: file LICENSE
+License: GPL-2 | file LICENSE
 URL: http://github.com/edzer/mss
-Collate: classes.R aggregate.R krige.R
-Packaged: 2014-04-05 16:01:02 UTC; edzer
-Author: Edzer Pebesma [cre, aut],
-  Christoph Stasch [cre]
-Maintainer: Edzer Pebesma <edzer.pebesma@uni-muenster.de>
+Collate: mss.R obsolete.R aggregate.R krige.R field.R
