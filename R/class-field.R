@@ -30,6 +30,7 @@
 #' @rdname SpatialField-class
 #' @aliases $,SpatialField-method spplot,SpatialField-method [,SpatialField-method SpatialField-class
 #' @exportClass SpatialField
+#' @export SpatialField
 #' @author Edzer Pebesma
 #' @seealso \link{SpatialEntities}
 #' @note If no domain is supplied, the domain is set to the collection of features. If no support is specified, the support is set to that of the features (points, polygons, lines, grid cells) in the \code{sp} object, and a warning is issued. A warning is issued if one or more of the features are (completely) outside the domain.

@@ -16,14 +16,15 @@ is.sum = function(x) {
 #'
 #' aggregation methods for objects of class SpatialField or SpatialEntities
 #' 
-#' @aliases aggregate
+#' @aliases aggregate aggregate.SpatialField
 #' @usage aggregate(x, ...)
 #' @param x object of class \code{SpatialField}
 #' @param by aggregation predicate
 #' @param FUN aggregation function
 #' @param ... arguments passed on to \code{FUN}
 #' @rdname aggregate
-#' @export aggregate SpatialField
+#' @export aggregate.SpatialField
+#' @export aggregate
 aggregate.SpatialField = function(x, by, FUN = mean, ...) {
 	if (is.sum(FUN))
 		warning("aggregation using a sum function is not considered meaningful for SpatialField objects")

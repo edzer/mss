@@ -8,7 +8,7 @@ Authors@R: c(person("Edzer", "Pebesma", role = c("cre", "aut"),
     person("Christoph", "Stasch", role = "ctb"))
 Depends: methods
 Imports: sp (>= 1.0-17), gstat (>= 1.0-20)
-Suggests: rgeos, maptools, spatstat, knitr
+Suggests: rgeos, MASS, knitr
 LazyData: yes
 License: GPL-2 | file LICENSE
 URL: http://github.com/edzer/mss
