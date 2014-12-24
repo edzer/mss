@@ -1,19 +1,22 @@
 #' SpatialEntities density method
 #'
 #' density estimate for SpatialEntities data
+#'
+#' @aliases density density.SpatialEntities
 #' @usage density(x, ...)
+#' @usage density.SpatialEntities(x, support = "point", bandwidth, newdata, ncells = 5000, ...)
 #' @param x object of class \link{SpatialEntities-class}
 #' @param support target support
 #' @param bandwidth bandwidth parameter (see \link[MASS]{kde2d})
 #' @param newdata target grid; if omitted, a grid over the window is created
 #' @param ncells in case no newdata is provided and window is a polygon, the approximate number of grid cells for the grid created
 #' @param ... ignored
+#' @rdname density
 #'
 #' @return object of class \link{SpatialField-class}
 #' 
-#' @rdname density
-#' @aliases density density.SpatialEntities
-#' @export density density.SpatialEntities
+#' @export density.SpatialEntities
+#' @export density
 density.SpatialEntities = function(x, support = "point", bandwidth, newdata, ncells = 5000, ...) {
 	if (missing(newdata)) {
 		newdata = x@window@sp

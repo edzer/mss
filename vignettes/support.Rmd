@@ -156,8 +156,8 @@ krige0(r ~ 1, sp, grd, vgm_area, vgm = vgm(1, "Exp", 5, 0))
 ## density for entitities
 ```{r}
 e = SpatialEntities(meuse, "point", meuse.area)
-spplot(density(e, newdata = meuse.grid)@sp, sp.layout = list(
-	list("sp.polygons", meuse.area, border = grey(.5)), 
+d = density(e, newdata = meuse.grid)
+spplot(d, sp.layout = list(list("sp.polygons", meuse.area, border = grey(.5)), 
 	list("sp.points", meuse, col = 'green')))
 ```
 
