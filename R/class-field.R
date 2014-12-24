@@ -11,6 +11,7 @@
 #'    \item{\code{sp}}{object of a subclass of \link[sp]{Spatial}}
 #'    \item{\code{support}}{object of class \link{Support}}
 #'    \item{\code{domain}}{object of class \link{Window}}
+#'    \item{\code{sp_equals_domain}}{logical; is \code{sp} identical to \code{domain}?}
 #'  }
 #'
 #' @usage SpatialField(...)
@@ -19,6 +20,8 @@
 #'    \item{sp}{object of one of the sublasses of \link{Spatial}}
 #'    \item{support}{object of class \link{Support}, or one of \code{"point"}, \code{"feature"}}
 #'    \item{domain}{object of class \link{Window}, or of a subclass of \link[sp]{Spatial} (typically: \link[sp]{SpatialPolygons}, \link[sp]{SpatialPixels} or \link[sp]{SpatialGrid})}
+#'    \item{sp_equals_domain}{logical; indicates whether the data of
+#'    \code{sp} is identical to the domain}
 #'  }
 #'
 #' @return object of class \link{SpatialField-class}
@@ -37,7 +40,8 @@
 #' m = SpatialEntities(meuse, "point", meuse.area)
 
 SpatialField = setClass("SpatialField",
-	slots = c(sp = "Spatial", support = "Support", domain = "Window"))
+	slots = c(sp = "Spatial", support = "Support", domain = "Window",
+		sp_equals_domain = "logical"))
 
 ##############################################################
 #' SpatialField initialize function
@@ -58,14 +62,16 @@ SpatialField = setClass("SpatialField",
 #' @rdname initialize-SpatialField-methods
 setMethod("initialize", "SpatialField", function(.Object, sp, support, domain) {
 	.Object <- callNextMethod()
-	stopifnot("data" %in% slotNames(sp)) # need attribute values
+	# stopifnot("data" %in% slotNames(sp)) # need attribute values
 	if (missing(support))
 		support = Support()
 	else if (is.character(support))
 		support = Support(support)
-	if (missing(domain))
+	if (missing(domain)) {
 		domain = Window(sp)
-	else {
+		.Object@sp_equals_domain = TRUE
+	} else {
+		.Object@sp_equals_domain = FALSE
 		if (is(domain, "Spatial"))
 			domain = Window(domain)
 #		check all features are inside domain here?
@@ -120,6 +126,8 @@ getArea = function(x) {
 #' @export
 is.complete = function(x) {
 	stopifnot(is(x, "SpatialField"))
+	if (x@support@what == "point" && x@sp_equals_domain)
+		return(TRUE)
 	x@support@what == "point" && 
 		(gridded(x@domain@sp) || is(x@domain@sp, "SpatialPolygons")) &&
 		isTRUE(all.equal(getArea(x@sp), getArea(x@domain@sp))) # allows for numerical fuzz

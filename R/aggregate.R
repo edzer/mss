@@ -32,7 +32,7 @@ aggregate.SpatialField = function(x, by, FUN = mean, ...) {
 }
 
 #' @rdname aggregate
-#' @export aggregate SpatialField
+#' @export aggregate SpatialEntities
 aggregate.SpatialEntities = function(x, by, FUN = mean, ...) {
 	if (!is.sum(FUN))
 		warning("aggregation using a non-sum function may not be meaningful for Point Pattern data")

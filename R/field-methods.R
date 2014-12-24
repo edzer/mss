@@ -42,20 +42,26 @@ setMethod("interpolate", c("formula", "SpatialField"),
 		SpatialField(addAttrToGeom(newdata, over(newdata, data@sp), TRUE),
 			support, data@domain)
 	} else {
-		args = append(list(formula, data@sp, newdata), list(...))
-		if (!requireNamespace("gstat", quietly = TRUE))
-			stop("package gstat required for interpolate()")
-		if (gridded(newdata) && support@what == "feature")
-			args$block = gridparameters(newdata)$cellsize
-		else if (support@what == "function") {
-			n = length(as.list(args(support@fn))) - 1
-		if (n == 2)
-				args$block = support@fn(0,0) # only for 2-D!
-			else if (n == 3)
-				args$block = support@fn(0,0,0) # only for 2-D!
-			else stop("nr of arguments not understood")
+		if (data@support@what == "feature") {
+			var1.pred = krige0(formula, data@sp, newdata, vgm_area, ...)
+			newdata = addAttrToGeom(newdata, data.frame(var1.pred), FALSE)
+			SpatialField(newdata, support, data@domain)
+		} else {
+			args = append(list(formula, data@sp, newdata), list(...))
+			#if (!requireNamespace("gstat", quietly = TRUE))
+			#	stop("package gstat required for interpolate()")
+			if (gridded(newdata) && support@what == "feature")
+				args$block = gridparameters(newdata)$cellsize
+			# else if (support@what == "function") {
+			# 	n = length(as.list(args(support@fn))) - 1
+			# if (n == 2)
+			# 		args$block = support@fn(0,0) # only for 2-D!
+			# 	else if (n == 3)
+			# 		args$block = support@fn(0,0,0) # only for 2-D!
+			# 	else stop("nr of arguments not understood")
+			# }
+			SpatialField(do.call("krige", args), support, data@domain)
 		}
-		SpatialField(do.call("krige", args), support, data@domain)
 	}
 })
 setMethod("spplot", "SpatialField", function(obj,...) spplot(obj@sp, ...))

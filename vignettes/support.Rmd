@@ -1,0 +1,187 @@
+<!--
+%\VignetteEngine{knitr::knitr}
+%\VignetteIndexEntry{Spatial and spatio-temporal objects in Google charts}
+-->
+
+# Spatial fields and entities
+
+## Support, Domain, and Observation Window
+This document introduces two classes for spatial data: `SpatialField`
+and `SpatialEntities`, for representing spatial fields, and entities,
+respectively. For both, the support of the variable is explicitly tracked. 
+Support refers to the physical size of data (observations or model
+predictions). A synonym for support is _footprint_.
+
+## a support class and method
+We define a support class as
+```{r}
+library(mss) # meaningful spatial statistics
+showClass("Support")
+```
+and can create a few instances by
+```{r}
+defaultSupport = Support()
+featureSupport = Support("feature")
+pointSupport = Support("point")
+fnSupport = Support(fn = function(x) x) # identity function
+```
+
+# Domain and observation windows
+The window class defines an area, either represented by a grid or by a polygon:
+```{r}
+showClass("Window")
+```
+
+After loading the `meuse` data set from `sp`,
+```{r}
+library(sp)
+demo(meuse, ask = FALSE, echo = FALSE)
+sapply(ls(), function(x) class(get(x)))
+meuse[1:5, 1:5]
+```
+we can define for instance a window for the observation points data 
+set by the `meuse.grid` data,
+```{r}
+w2 = Window(sp = meuse.grid) # note the grid is passed, not the polygons
+```
+or by using the area as single polygon:
+```{r}
+w1 = Window(sp = meuse.area)
+```
+
+We define spatial data objects as having support, and either having
+an observation window (for entities) or a domain (for fields).
+```{r}
+showClass("SpatialField")
+showClass("SpatialEntities")
+```
+
+## Examples
+
+### interpolation of point support data
+We can predict to points, laid out regularly, inside a polygon
+```{r}
+m = SpatialField(meuse, "point", meuse.area) # data are point support
+i1 = interpolate(log(zinc)~1, m, support = "point") # interpolate from point TO point support
+spplot(i1, "var1.pred")
+```
+
+or we can predict the polygon area mean value:
+```{r}
+library(rgeos)
+i2 = interpolate(log(zinc)~1, m, support = "feature") # interpolate from point TO polygon support
+i2$var1.pred # a single value, estimate of mean for the whole area
+mean(log(m$zinc)) # sample mean
+mean(i1$var1.pred) # mean of predictions, similar to i2$var1.pred
+```
+We can repeat this with a domain, defined by the `meuse.grid` object, by
+predicting to point support values for points on a grid
+```{r}
+m = SpatialField(meuse, "point", meuse.grid)
+i3 = interpolate(log(zinc)~1, m, support = "point")
+print(as(i3[1:3,], "data.frame"), digits = 10) # point support
+```
+or predict values for cell means:
+```{r}
+i4 = interpolate(log(zinc)~1, m, support = "feature") # interpolate from point TO feature (cell) support
+print(as(i4[1:3,], "data.frame"), digits = 10) # grid cells support
+spplot(i4, "var1.pred")
+```
+
+## support of the feature
+Suppose we have grid data on a 3 x 3 grid, and
+want to estimate on a new location, indicated by a red
+circle:
+```{r}
+set.seed(131)
+gt = GridTopology(cellcentre.offset = c(0,0), cellsize = c(1,1), cells.dim = c(3,3))
+sgdf = SpatialGridDataFrame(SpatialGrid(gt), 
+	data.frame(r = round(runif(9, max = 10), 1)))
+plot(as(sgdf, "SpatialPolygons"), axes = TRUE)
+text(coordinates(sgdf), labels = sgdf[[1]])
+pt.red = SpatialPoints(cbind(0.25, 0.25))
+points(pt.red, col = 'red', pch = 1)
+```
+
+The first case is when the grid cell data represent
+point support values at the grid cell centre, which
+is identical to case `i1` above:
+```{r}
+sf = SpatialField(as(sgdf, "SpatialPointsDataFrame"), "point", sgdf)
+i5 = interpolate(r~1, sf, "point", newdata = pt.red)
+as(i5[1,], "data.frame")
+```
+The second case, grid cells represent constant area with
+point support value, meaning that every point location within
+a grid cell has the value of the grid cell assigned:
+```{r}
+sf = SpatialField(sgdf, "point", sgdf)
+i6 = interpolate(r~1, sf, "point", newdata = pt.red)
+as(i6[1,], "data.frame")
+```
+as case (...) above, we can predict a mean value for a grid cell by
+```{r}
+gt = GridTopology(cellcentre.offset = c(.25,.25), cellsize = c(1,1), cells.dim = c(1,1))
+grd.red = SpatialGrid(gt)
+i7 = interpolate(r~1, sf, "feature", newdata = grd.red)
+i7@sp@data
+```
+
+
+## area-to-point kriging
+```{r}
+sp = as(sgdf, "SpatialPolygonsDataFrame")
+gf = SpatialField(sp, "feature")
+library(gstat)
+kr = interpolate(r~1, gf, "feature", newdata = pt.red, 
+	vgm = vgm(1, "Exp", 5, 0))
+kr@sp[[1]]
+krige0(r ~ 1, sp, pt.red, vgm_area, vgm = vgm(1, "Exp", 5, 0))
+```
+
+## grid-to-grid kriging
+```{r}
+sp = as(sgdf, "SpatialPolygonsDataFrame")
+gr = as(grd.red, "SpatialPolygons")
+grd = addAttrToGeom(gr, data.frame(r=0), FALSE)
+plot(as(sgdf, "SpatialPolygons"), axes = TRUE)
+text(coordinates(sgdf), labels = sgdf[[1]])
+plot(grd, add = TRUE, border = 'red')
+kr = interpolate(r~1, gf, "feature", newdata = grd, 
+	vgm = vgm(1, "Exp", 5, 0))
+kr@sp[[1]]
+krige0(r ~ 1, sp, grd, vgm_area, vgm = vgm(1, "Exp", 5, 0))
+```
+
+## density for entitities
+```{r}
+e = SpatialEntities(meuse, "point", meuse.area)
+spplot(density(e, newdata = meuse.grid)@sp, sp.layout = list(
+	list("sp.polygons", meuse.area, border = grey(.5)), 
+	list("sp.points", meuse, col = 'green')))
+```
+
+## aggregate: meaningful
+generate warnings of mip/mss
+
+## TODOs
+* verify that SpatialPixel objects do not have anyDuplicated(x@grid.index), for domain, or sp
+* think functional support through: is it needed? How does it link to predict.gstat?
+* grid cells: (i) constant value in grid cells: support = "point";
+(ii) single value for aggregate of grid cell: support = "feature";
+(iii) single value only valid for grid cell centre: object needs
+to be coercer to SpatialPoints and support = "point"
+* check whether multiple polygons work!
+* check whether observations match domain
+
+## functional support
+```{r}
+f4x4 = function(size) {
+	grd = size * expand.grid(x = c(-3, -1, 1, 3), y = c(-3, -1, 1, 3)) / 8
+	n = nrow(grd)
+	function(x = 0, y = 0) as.matrix(cbind(rep(x,n),rep(y,n)) + grd)
+}
+f = f4x4(2)
+f() # centered at (0,0)
+f(10,5) # centered at (10,5)
+```

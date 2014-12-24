@@ -7,10 +7,11 @@ Authors@R: c(person("Edzer", "Pebesma", role = c("cre", "aut"),
     email = "edzer.pebesma@uni-muenster.de"),
     person("Christoph", "Stasch", role = "ctb"))
 Depends: methods
-Imports: sp, gstat
-Suggests: rgeos, maptools, spatstat
+Imports: sp (>= 1.0-17), gstat (>= 1.0-20)
+Suggests: rgeos, maptools, spatstat, knitr
 LazyData: yes
 License: GPL-2 | file LICENSE
 URL: http://github.com/edzer/mss
+VignetteBuilder: knitr
 Collate: mss.R class-support.R class-window.R class-entity.R class-field.R 
-	field-methods.R aggregate.R
+	field-methods.R entities-methods.R aggregate.R

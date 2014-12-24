@@ -17,6 +17,8 @@ SpatialField(...)
    \item{sp}{object of one of the sublasses of \link{Spatial}}
    \item{support}{object of class \link{Support}, or one of \code{"point"}, \code{"feature"}}
    \item{domain}{object of class \link{Window}, or of a subclass of \link[sp]{Spatial} (typically: \link[sp]{SpatialPolygons}, \link[sp]{SpatialPixels} or \link[sp]{SpatialGrid})}
+   \item{sp_equals_domain}{logical; indicates whether the data of
+   \code{sp} is identical to the domain}
  }}
 }
 \value{
@@ -39,6 +41,7 @@ If no domain is supplied, the domain is set to the collection of features. If no
    \item{\code{sp}}{object of a subclass of \link[sp]{Spatial}}
    \item{\code{support}}{object of class \link{Support}}
    \item{\code{domain}}{object of class \link{Window}}
+   \item{\code{sp_equals_domain}}{logical; is \code{sp} identical to \code{domain}?}
  }
 }
 \examples{
