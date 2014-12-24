@@ -5,11 +5,12 @@ Version: 0.2-0
 Date: 2014-12-19
 Authors@R: c(person("Edzer", "Pebesma", role = c("cre", "aut"),
     email = "edzer.pebesma@uni-muenster.de"),
-    person("Christoph", "Stasch", role = "cre"))
+    person("Christoph", "Stasch", role = "ctb"))
 Depends: methods
 Imports: sp, gstat
 Suggests: rgeos, maptools, spatstat
 LazyData: yes
 License: GPL-2 | file LICENSE
 URL: http://github.com/edzer/mss
-Collate: mss.R obsolete.R aggregate.R krige.R field.R
+Collate: mss.R class-support.R class-window.R class-entity.R class-field.R 
+	field-methods.R aggregate.R
