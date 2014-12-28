@@ -2,16 +2,16 @@ Package: mss
 Title: Meaningful Spatial Statistics
 Description: classes and methods for meaningful spatial statistics
 Version: 0.2-0
-Date: 2014-12-19
+Date: 2014-12-28
 Authors@R: c(person("Edzer", "Pebesma", role = c("cre", "aut"),
     email = "edzer.pebesma@uni-muenster.de"),
     person("Christoph", "Stasch", role = "ctb"))
 Depends: methods
-Imports: sp (>= 1.0-17), gstat (>= 1.0-20)
-Suggests: rgeos, MASS, knitr
+Imports: sp (>= 1.0-17)
+Suggests: rgeos, gstat (>= 1.0-20), MASS, knitr
 LazyData: yes
 License: GPL-2 | file LICENSE
 URL: http://github.com/edzer/mss
 VignetteBuilder: knitr
-Collate: mss.R class-support.R class-window.R class-entity.R class-field.R 
+Collate: mss.R class-window.R class-entity.R class-field.R class-aggregation.R 
 	field-methods.R entities-methods.R aggregate.R

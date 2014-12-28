@@ -5,14 +5,12 @@
 \alias{initialize,SpatialEntities-method}
 \title{SpatialEntities initialize function}
 \usage{
-\S4method{initialize}{SpatialEntities}(.Object, sp, support, window)
+\S4method{initialize}{SpatialEntities}(.Object, observations, window)
 }
 \arguments{
 \item{.Object}{object to initialize}
 
-\item{sp}{object of one of the sublasses of \link{Spatial}}
-
-\item{support}{object of class \link{Support}}
+\item{observations}{object of one of the sublasses of \link{Spatial}}
 
 \item{window}{object of class \link{Window}}
 }

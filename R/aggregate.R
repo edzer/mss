@@ -27,7 +27,7 @@ is.sum = function(x) {
 #' @export aggregate
 aggregate.SpatialField = function(x, by, FUN = mean, ...) {
 	if (is.sum(FUN))
-		warning("aggregation using a sum function is not considered meaningful for SpatialField objects")
+		not_meaningful("for SpatialField objects, aggregation using a sum function")
 	stop("not yet implemented")
 	aggregate(x@sp, by, FUN, ...)
 }

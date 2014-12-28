@@ -5,14 +5,12 @@
 \alias{initialize,SpatialField-method}
 \title{SpatialField initialize function}
 \usage{
-\S4method{initialize}{SpatialField}(.Object, sp, support, domain)
+\S4method{initialize}{SpatialField}(.Object, observations, domain)
 }
 \arguments{
 \item{.Object}{(ignore)}
 
-\item{sp}{object of one of the sublasses of \link[sp]{Spatial}}
-
-\item{support}{object of class \link{Support}, or one of "point" and "feature"}
+\item{observations}{object of one of the sublasses of \link[sp]{Spatial}}
 
 \item{domain}{object of class \link{Window}, or subclass of \link[sp]{Spatial}}
 }

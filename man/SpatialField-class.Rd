@@ -14,11 +14,10 @@ SpatialField(...)
 \arguments{
 \item{...}{named arguments, according to the following list:
  \describe{
-   \item{sp}{object of one of the sublasses of \link{Spatial}}
-   \item{support}{object of class \link{Support}, or one of \code{"point"}, \code{"feature"}}
+   \item{observations}{object of one of the sublasses of \link[sp]{Spatial}}
    \item{domain}{object of class \link{Window}, or of a subclass of \link[sp]{Spatial} (typically: \link[sp]{SpatialPolygons}, \link[sp]{SpatialPixels} or \link[sp]{SpatialGrid})}
-   \item{sp_equals_domain}{logical; indicates whether the data of
-   \code{sp} is identical to the domain}
+   \item{observations_equal_domain}{logical; indicates whether the
+   \code{observations} are identical to the domain}
  }}
 }
 \value{
@@ -29,25 +28,24 @@ SpatialField: a Class for Spatial Fields (Objects)
 }
 \details{
 A class to store spatial fields, such as temperatures, elevation,
-land use, and so on, along with their support (or footprint) and
-domain for which the set observation are valid and interpolation makes sense.
+land use, and so on, which have point support (footprint), along with the
+domain for which the set observation are valid e.g. to make interpolations.
 }
 \note{
-If no domain is supplied, the domain is set to the collection of features. If no support is specified, the support is set to that of the features (points, polygons, lines, grid cells) in the \code{sp} object, and a warning is issued. A warning is issued if one or more of the features are (completely) outside the domain.
+If no domain is supplied, the domain is set to the collection of features. A warning is issued if one or more of the features are (completely) outside the domain.
 }
 \section{Slots}{
 
  \describe{
-   \item{\code{sp}}{object of a subclass of \link[sp]{Spatial}}
-   \item{\code{support}}{object of class \link{Support}}
+   \item{\code{observations}}{object of a subclass of \link[sp]{Spatial}}
    \item{\code{domain}}{object of class \link{Window}}
-   \item{\code{sp_equals_domain}}{logical; is \code{sp} identical to \code{domain}?}
+   \item{\code{observations_equal_domain}}{logical; are the \code{observations} identical to the \code{domain}?}
  }
 }
 \examples{
 library(sp)
 demo(meuse, ask = FALSE, echo = FALSE)
-m = SpatialEntities(meuse, "point", meuse.area)
+m = SpatialField(meuse, meuse.area)
 }
 \author{
 Edzer Pebesma

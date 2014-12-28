@@ -11,8 +11,7 @@ SpatialEntities(...)
 \arguments{
 \item{...}{named arguments from the following list:
 \describe{
-  \item{\code{sp}}{object of one of the sublasses of \link{Spatial}}
-  \item{\code{support}}{object of class \link{Support}, or character}
+  \item{\code{observations}}{object of one of the sublasses of \link{Spatial}}
   \item{\code{window}}{object of class \link{Window} or \link{Spatial}}
 }}
 }
@@ -24,24 +23,23 @@ SpatialEntities: a Class for Spatial Entities (Objects)
 }
 \details{
 A class to store spatial entities, such as trees, buildings and so on,
-along with their support (or footprint) and window for which the set of
+along with the observed window, the area for which the set of
 entities is exhaustive
 }
 \note{
-If no window is supplied, the window is set to the collection of features, and a warning is issued. If no support is specified, the support is set to that of the features (points, polygons, lines, grid cells) in the \code{sp} object, and a warning is issued.
+If no window is supplied, the window is set to the collection of features, and a warning is issued. Support is assumed to be that of the features (points, polygons, lines, grid cells) in the \code{observations} object.
 }
 \section{Slots}{
 
  \describe{
-   \item{\code{sp}}{object of a subclass of \link[sp]{Spatial}}
-   \item{\code{support}}{object of class \link{Support}}
+   \item{\code{observations}}{object of a subclass of \link[sp]{Spatial}}
    \item{\code{window}}{object of class \link{Window}}
  }
 }
 \examples{
 library(sp)
 demo(meuse, ask = FALSE, echo = FALSE)
-m = SpatialEntities(meuse, "point", meuse.area)
+m = SpatialEntities(meuse, meuse.area)
 }
 \author{
 Edzer Pebesma

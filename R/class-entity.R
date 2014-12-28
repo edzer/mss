@@ -3,21 +3,19 @@
 #' SpatialEntities: a Class for Spatial Entities (Objects)
 #'
 #' A class to store spatial entities, such as trees, buildings and so on,
-#' along with their support (or footprint) and window for which the set of
+#' along with the observed window, the area for which the set of
 #' entities is exhaustive
 #'
 #'@section Slots: 
 #'  \describe{
-#'    \item{\code{sp}}{object of a subclass of \link[sp]{Spatial}}
-#'    \item{\code{support}}{object of class \link{Support}}
+#'    \item{\code{observations}}{object of a subclass of \link[sp]{Spatial}}
 #'    \item{\code{window}}{object of class \link{Window}}
 #'  }
 #'
 #' @usage SpatialEntities(...)
 #' @param ... named arguments from the following list:
 #'  \describe{
-#'    \item{\code{sp}}{object of one of the sublasses of \link{Spatial}}
-#'    \item{\code{support}}{object of class \link{Support}, or character}
+#'    \item{\code{observations}}{object of one of the sublasses of \link{Spatial}}
 #'    \item{\code{window}}{object of class \link{Window} or \link{Spatial}}
 #'  }
 #' @return object of class \link{SpatialEntities-class}
@@ -28,17 +26,18 @@
 #' @exportClass SpatialEntities
 #' @author Edzer Pebesma
 #' @seealso \link{SpatialField}
-#' @note If no window is supplied, the window is set to the collection of features, and a warning is issued. If no support is specified, the support is set to that of the features (points, polygons, lines, grid cells) in the \code{sp} object, and a warning is issued.
+#' @note If no window is supplied, the window is set to the collection of features, and a warning is issued. Support is assumed to be that of the features (points, polygons, lines, grid cells) in the \code{observations} object.
 #'
 #' @examples
 #' library(sp)
 #' demo(meuse, ask = FALSE, echo = FALSE)
-#' m = SpatialEntities(meuse, "point", meuse.area)
+#' m = SpatialEntities(meuse, meuse.area)
 SpatialEntities = setClass("SpatialEntities",
-	slots = c(sp = "Spatial", support = "Support", window = "Window"),
+	slots = c(observations = "Spatial", window = "Window"),
 	validity = function(object) {
 		# check all features are inside window:
-		stopifnot(any(is.na(over(object@sp, geometry(object@window)))))
+		if (any(is.na(over(object@observations, geometry(object@window)))))
+			stop("one or more features are outside the observation window")
 		return(TRUE)
 	}
 )
@@ -47,8 +46,7 @@ SpatialEntities = setClass("SpatialEntities",
 #' initializes (creates) SpatialEntities objects
 #'
 #' @param .Object object to initialize
-#' @param sp object of one of the sublasses of \link{Spatial}
-#' @param support object of class \link{Support}
+#' @param observations object of one of the sublasses of \link{Spatial}
 #' @param window object of class \link{Window}
 #'
 #' @return object of class \link{SpatialEntities-class}
@@ -61,23 +59,18 @@ SpatialEntities = setClass("SpatialEntities",
 #' @docType methods
 #' @rdname initialize-SpatialEntities-methods
 setMethod("initialize", "SpatialEntities", function(.Object, 
-			sp, support, window) {
+			observations, window) {
 	.Object <- callNextMethod()
-	if (missing(support))
-		support = Support()
-	else if (is.character(support))
-		support = Support(support)
 	if (missing(window)) {
 		warning("window set to the observation data features", call. = FALSE)
-		window = Window(sp)
+		window = Window(observations)
 	} else { # window specified
 		if (is(window, "Spatial"))
 			window = Window(window)
-		if (any(is.na(over(sp, window@sp))))
+		if (any(is.na(over(observations, window@sp))))
 			warning("some observations are outside the window", call. = FALSE)
 	}
-	.Object@sp = sp
-	.Object@support = support
+	.Object@observations = observations
 	.Object@window = window
 	.Object
 })

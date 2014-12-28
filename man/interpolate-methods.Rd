@@ -3,22 +3,20 @@
 \docType{methods}
 \name{interpolate}
 \alias{interpolate}
-\alias{interpolate,formula,SpatialField-method}
+\alias{interpolate,formula,SpatialField,SpatialField-method}
 \title{Method interpolate}
 \usage{
-\S4method{interpolate}{formula,SpatialField}(formula, data, support, ...,
-  newdata, ncells = 5000)
+\S4method{interpolate}{formula,SpatialField,SpatialField}(formula, data,
+  newdata, ...)
 }
 \arguments{
 \item{formula}{specifing which variable should be interpolated, see also \link[gstat]{krige}}
 
 \item{data}{object of class \link{SpatialField-class}}
 
-\item{support}{target support}
+\item{newdata}{target locations; if missing, points are chosen from the domain of \code{data}}
 
 \item{...}{passed on to \link[gstat]{krige}}
-
-\item{newdata}{target locations; if missing, these are derived from  the domain of \code{data}}
 
 \item{ncells}{in case no newdata is provided and point support interpolations are computed over a polygon area, the approximate number of grid cells (default 5000)}
 }

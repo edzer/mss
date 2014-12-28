@@ -1,10 +1,9 @@
-
 #' Method interpolate
 #' @name interpolate
 #' @rdname interpolate-methods
 #' @exportMethod interpolate
 if (!isGeneric("interpolate"))
-	setGeneric("interpolate", function(formula, data, ...)
+	setGeneric("interpolate", function(formula, data, newdata, ...)
 		standardGeneric("interpolate"))
 #' SpatialField interpolation method
 #'
@@ -12,8 +11,7 @@ if (!isGeneric("interpolate"))
 #'
 #' @param formula specifing which variable should be interpolated, see also \link[gstat]{krige}
 #' @param data object of class \link{SpatialField-class}
-#' @param support target support
-#' @param newdata target locations; if missing, these are derived from  the domain of \code{data}
+#' @param newdata target locations; if missing, points are chosen from the domain of \code{data}
 #' @param ncells in case no newdata is provided and point support interpolations are computed over a polygon area, the approximate number of grid cells (default 5000)
 #' @param ... passed on to \link[gstat]{krige}
 #'
@@ -24,47 +22,121 @@ if (!isGeneric("interpolate"))
 #' @export
 #' @docType methods
 #' @rdname interpolate-methods
-setMethod("interpolate", c("formula", "SpatialField"),
-  function(formula, data, support, ..., newdata, ncells = 5000) {
-	if (missing(support))
-		support = Support("point")
-	else if (is.character(support))
-		support = Support(support)
-	if (missing(newdata)) {
+setMethod("interpolate", c("formula", "SpatialField", "SpatialField"),
+	function(formula, data, newdata, ...) {
+		if (any(is.na(over(newdata@observations, data@domain@sp))))
+			not_meaningful("interpolation outside the observation domain")
+		if (full.coverage(data)) {
+			stopifnot(is(newdata@observations, "SpatialPoints"))
+			SpatialField(addAttrToGeom(newdata@observations, 
+					over(newdata@observations, data@observations), TRUE), 
+				data@domain)
+		} else { # point kriging
+			if (!requireNamespace("gstat", quietly = TRUE))
+				stop("package gstat required")
+			SpatialField(gstat::krige(formula, data@observations, 
+				newdata@observations, ...), data@domain)
+		}
+	}
+)
+setMethod("interpolate", c("formula", "SpatialField", "missing"),
+	function(formula, data, newdata, ..., ncells = 5000) {
 		newdata = data@domain@sp
-		if (!gridded(newdata) && support@what == "point") {
+		if (!gridded(newdata)) {
 			newdata = spsample(newdata, ncells, "regular")
 			gridded(newdata) = TRUE
 		}
-	}
-	if (is.complete(data) && is(newdata, "SpatialPoints")) {
-		stopifnot(support@what == "point")
-		SpatialField(addAttrToGeom(newdata, over(newdata, data@sp), TRUE),
-			support, data@domain)
-	} else {
-		if (data@support@what == "feature") {
-			var1.pred = krige0(formula, data@sp, newdata, vgm_area, ...)
-			newdata = addAttrToGeom(newdata, data.frame(var1.pred), FALSE)
-			SpatialField(newdata, support, data@domain)
-		} else {
-			args = append(list(formula, data@sp, newdata), list(...))
-			#if (!requireNamespace("gstat", quietly = TRUE))
-			#	stop("package gstat required for interpolate()")
-			if (gridded(newdata) && support@what == "feature")
-				args$block = gridparameters(newdata)$cellsize
-			# else if (support@what == "function") {
-			# 	n = length(as.list(args(support@fn))) - 1
-			# if (n == 2)
-			# 		args$block = support@fn(0,0) # only for 2-D!
-			# 	else if (n == 3)
-			# 		args$block = support@fn(0,0,0) # only for 2-D!
-			# 	else stop("nr of arguments not understood")
-			# }
-			SpatialField(do.call("krige", args), support, data@domain)
-		}
-	}
+		interpolate(formula, data, SpatialField(newdata), ...)
 })
-setMethod("spplot", "SpatialField", function(obj,...) spplot(obj@sp, ...))
-setMethod("$", "SpatialField", function(x, name) x@sp[[name]])
+setMethod("interpolate", c("formula", "SpatialField", "SpatialAggregation"),
+  	function(formula, data, newdata, ..., ncells = 5000) {
+		if (any(is.na(over(newdata@sp, data@domain@sp))))
+			not_meaningful("interpolation outside the data domain")
+		if (!requireNamespace("gstat", quietly = TRUE))
+			stop("package gstat required")
+		if (gridded(newdata@sp)) {
+			block = gridparameters(newdata@sp)$cellsize
+			SpatialAggregation(sp = 
+				gstat::krige(formula, data@observations, newdata@sp, block = block, ...))
+		} else
+			SpatialAggregation(sp = gstat::krige(formula, data@observations, 
+				newdata@sp, ...))
+})
+setMethod("interpolate", c("formula", "SpatialAggregation", "SpatialField"),
+	function(formula, data, newdata, ...) {
+		if (!requireNamespace("gstat", quietly = TRUE))
+			stop("package gstat required")
+		var1.pred = gstat::krige0(formula, data@sp, newdata@observations,
+			vgm_area, ...)
+		nd = addAttrToGeom(newdata@observations, data.frame(var1.pred), FALSE)
+		SpatialField(nd, domain = newdata@domain)
+	}
+)
+setMethod("interpolate", c("formula", "SpatialAggregation", "SpatialAggregation"),
+	function(formula, data, newdata, ...) {
+		if (!requireNamespace("gstat", quietly = TRUE))
+			stop("package gstat required")
+		var1.pred = gstat::krige0(formula, data@sp, newdata@sp,
+			vgm_area, ...)
+		newdata = addAttrToGeom(newdata@sp, data.frame(var1.pred), FALSE)
+		SpatialAggregation(sp = newdata)
+	}
+)
+setMethod("spplot", "SpatialField", function(obj,...) spplot(obj@observations, ...))
+setMethod("$", "SpatialField", function(x, name) x@observations[[name]])
 setMethod("[", "SpatialField", 
+	function(x, i, j, ..., drop = TRUE) x@observations[i, j, ..., drop = drop])
+setMethod("$", "SpatialAggregation", function(x, name) x@sp[[name]])
+setMethod("spplot", "SpatialAggregation", function(obj,...) spplot(obj@sp, ...))
+setMethod("[", "SpatialAggregation", 
 	function(x, i, j, ..., drop = TRUE) x@sp[i, j, ..., drop = drop])
+
+#' assess whether function has complete coverage over the domain
+#' 
+#' fields with point support, defined for all areas in the domain are completely known; this function verifies that this is the case
+#' 
+#' @param x object of class \link{SpatialField-class}
+#' @return logical; TRUE if support is "point" and area size of the observations is identical to that of the domain; this implies we have a coverage with knowledge of all points in the domain.
+#' @note what the function does is not sufficient: identical area size does not guarantee that areas are identical
+#' @export
+full.coverage = function(x) {
+	stopifnot(is(x, "SpatialField"))
+	if (x@observations_equal_domain)
+		return(TRUE)
+	(gridded(x@domain@sp) || is(x@domain@sp, "SpatialPolygons")) &&
+		isTRUE(all.equal(getArea(x@observations), 
+			getArea(x@domain@sp))) # allows for numerical fuzz
+}
+#' compute area of a Spatial* object
+#'
+#' compute the area of an object of one of the subclasses of \link[sp]{Spatial}
+#'
+#' area of gridded or polygon objects deriving from \link[sp]{Spatial}, zero
+#' for other classes (points, lines)
+#'
+#' @param x object of a subclass of \link[sp]{Spatial}
+#' @return the area of the features (grid cells or polygons) in the object
+#' @export
+#' @examples
+#' library(sp)
+#' demo(meuse, ask = FALSE, echo = FALSE)
+#' getArea(meuse)
+#' getArea(meuse.area)
+getArea = function(x) {
+	stopifnot(is(x, "Spatial"))
+	if (gridded(x))
+		return(areaSpatialGrid(x))
+	getAreaSP = function(x) { # copied from sp/R/spsample.R:
+    		getAreaPolygons = function(x) {
+        		holes = unlist(lapply(x@Polygons, function(x) x@hole))
+        		areas = unlist(lapply(x@Polygons, function(x) x@area))
+        		area = ifelse(holes, -1, 1) * areas
+        		area
+    		}
+    		sum(unlist(lapply(x@polygons, getAreaPolygons)))
+	}
+	if (is(x, "SpatialPolygons"))
+		return(getAreaSP(x))
+	# lines, points:
+	return(0.0)
+}

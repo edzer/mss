@@ -6,7 +6,6 @@ assign("mss_error", FALSE, envir = .mssOptions)
 #' @import methods
 #' @importFrom stats aggregate density
 #' @import sp 
-#' @import gstat 
 NULL
 
 #' assign whether non-meaningful actions should result in an error

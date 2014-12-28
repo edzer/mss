@@ -41,8 +41,9 @@ setMethod("initialize", "Window", function(.Object, sp) {
 	.Object <- callNextMethod()
 	if (missing(sp))
 		stop("sp argument needs to be supplied")
-	if(!((is(sp, "Spatial") && gridded(sp)) || is(sp, "SpatialPolygons")))
-		stop("Window objects should reflect an area, as grid or polygons")
+	stopifnot(is(sp, "Spatial")) # should be automatic
+	if (!(gridded(sp) || is(sp, "SpatialPolygons")))
+		stop("Window object needs to reflect an area, as grid or polygons")
 	.Object@sp = sp
 	.Object
 })
