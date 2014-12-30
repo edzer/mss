@@ -20,7 +20,7 @@ mss_error = function(error = TRUE) {
 	assign("mss_error", error, envir = .mssOptions)
 }
 
-mss = function(x, what) {
+mss = function(x, what = "") {
 	stopifnot(is.character(x))
 	stopifnot(length(x) == 1)
 	msg = paste(x, what)

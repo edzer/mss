@@ -11,7 +11,7 @@ Window(...)
 \arguments{
 \item{...}{named parameter, containing
 \describe{
-  \item{\code{sp}}{object of a subclass of \link[sp]{Spatial}}
+  \item{\code{area}}{object of a subclass of \link[sp]{Spatial}}
 }}
 }
 \value{
@@ -26,12 +26,12 @@ entities can form an exhaustive set for an area called the observed
 window. For both, the Window class is used to specify this area.
 }
 \note{
-if \code{sp} is not of (a subclass of) class \link[sp]{SpatialPolygons}, \link[sp]{SpatialPixels}, or \link[sp]{SpatialGrid}, an error results.
+if \code{area} is not of (a subclass of) class \link[sp]{SpatialPolygons}, \link[sp]{SpatialPixels}, or \link[sp]{SpatialGrid}, an error results.
 }
 \section{Slots}{
 
  \describe{
-   \item{\code{sp}}{object of a subclass of \link[sp]{Spatial}}
+   \item{\code{area}}{object of a subclass of \link[sp]{Spatial}}
  }
 }
 \author{

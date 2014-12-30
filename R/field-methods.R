@@ -24,7 +24,7 @@ if (!isGeneric("interpolate"))
 #' @rdname interpolate-methods
 setMethod("interpolate", c("formula", "SpatialField", "SpatialField"),
 	function(formula, data, newdata, ...) {
-		if (any(is.na(over(newdata@observations, data@domain@sp))))
+		if (any(is.na(over(newdata@observations, data@domain@area))))
 			not_meaningful("interpolation outside the observation domain")
 		if (full.coverage(data)) {
 			stopifnot(is(newdata@observations, "SpatialPoints"))
@@ -41,7 +41,7 @@ setMethod("interpolate", c("formula", "SpatialField", "SpatialField"),
 )
 setMethod("interpolate", c("formula", "SpatialField", "missing"),
 	function(formula, data, newdata, ..., ncells = 5000) {
-		newdata = data@domain@sp
+		newdata = data@domain@area
 		if (!gridded(newdata)) {
 			newdata = spsample(newdata, ncells, "regular")
 			gridded(newdata) = TRUE
@@ -50,23 +50,23 @@ setMethod("interpolate", c("formula", "SpatialField", "missing"),
 })
 setMethod("interpolate", c("formula", "SpatialField", "SpatialAggregation"),
   	function(formula, data, newdata, ..., ncells = 5000) {
-		if (any(is.na(over(newdata@sp, data@domain@sp))))
+		if (any(is.na(over(newdata@observations, data@domain@area))))
 			not_meaningful("interpolation outside the data domain")
 		if (!requireNamespace("gstat", quietly = TRUE))
 			stop("package gstat required")
-		if (gridded(newdata@sp)) {
-			block = gridparameters(newdata@sp)$cellsize
-			SpatialAggregation(sp = 
-				gstat::krige(formula, data@observations, newdata@sp, block = block, ...))
+		if (gridded(newdata@observations)) {
+			block = gridparameters(newdata@observations)$cellsize
+			SpatialAggregation(gstat::krige(formula, data@observations, 
+				newdata@observations, block = block, ...))
 		} else
-			SpatialAggregation(sp = gstat::krige(formula, data@observations, 
-				newdata@sp, ...))
+			SpatialAggregation(gstat::krige(formula, data@observations, 
+				newdata@observations, ...))
 })
 setMethod("interpolate", c("formula", "SpatialAggregation", "SpatialField"),
 	function(formula, data, newdata, ...) {
 		if (!requireNamespace("gstat", quietly = TRUE))
 			stop("package gstat required")
-		var1.pred = gstat::krige0(formula, data@sp, newdata@observations,
+		var1.pred = gstat::krige0(formula, data@observations, newdata@observations,
 			vgm_area, ...)
 		nd = addAttrToGeom(newdata@observations, data.frame(var1.pred), FALSE)
 		SpatialField(nd, domain = newdata@domain)
@@ -76,20 +76,40 @@ setMethod("interpolate", c("formula", "SpatialAggregation", "SpatialAggregation"
 	function(formula, data, newdata, ...) {
 		if (!requireNamespace("gstat", quietly = TRUE))
 			stop("package gstat required")
-		var1.pred = gstat::krige0(formula, data@sp, newdata@sp,
+		var1.pred = gstat::krige0(formula, data@observations, newdata@observations,
 			vgm_area, ...)
-		newdata = addAttrToGeom(newdata@sp, data.frame(var1.pred), FALSE)
-		SpatialAggregation(sp = newdata)
+		newdata = addAttrToGeom(newdata@observations, data.frame(var1.pred), FALSE)
+		SpatialAggregation(newdata)
 	}
 )
 setMethod("spplot", "SpatialField", function(obj,...) spplot(obj@observations, ...))
 setMethod("$", "SpatialField", function(x, name) x@observations[[name]])
 setMethod("[", "SpatialField", 
 	function(x, i, j, ..., drop = TRUE) x@observations[i, j, ..., drop = drop])
-setMethod("$", "SpatialAggregation", function(x, name) x@sp[[name]])
-setMethod("spplot", "SpatialAggregation", function(obj,...) spplot(obj@sp, ...))
+setMethod("$", "SpatialAggregation", function(x, name) x@observations[[name]])
+setMethod("spplot", "SpatialAggregation", function(obj,...) spplot(obj@observations, ...))
 setMethod("[", "SpatialAggregation", 
-	function(x, i, j, ..., drop = TRUE) x@sp[i, j, ..., drop = drop])
+	function(x, i, j, ..., drop = TRUE) x@observations[i, j, ..., drop = drop])
+double_bracket = function(x, i, j, ...) {
+	if (!("data" %in% slotNames(x@observations)))
+		stop("no [[ method for object without attributes")
+	x@observations@data[[i]]
+}
+double_bracket_repl = function(x, i, j, value) {
+	if (!("data" %in% slotNames(x@observations)))
+		stop("no [[ method for object without attributes")
+	if (is.character(i) && 
+			any(!is.na(match(i, dimnames(coordinates(x@observations))[[2]]))))
+		stop(paste(i, "is already present as a coordinate name!"))
+	x@observations@data[[i]] <- value
+	x
+}
+setMethod("[[", c("SpatialField", "ANY", "missing"), double_bracket)
+setMethod("[[", c("SpatialEntities", "ANY", "missing"), double_bracket)
+setMethod("[[", c("SpatialAggregation", "ANY", "missing"), double_bracket)
+setReplaceMethod("[[", c("SpatialField", "ANY", "missing", "ANY"), double_bracket_repl)
+setReplaceMethod("[[", c("SpatialEntities", "ANY", "missing", "ANY"), double_bracket_repl)
+setMethod("[[", c("SpatialAggregation", "ANY", "missing"), double_bracket)
 
 #' assess whether function has complete coverage over the domain
 #' 
@@ -103,9 +123,9 @@ full.coverage = function(x) {
 	stopifnot(is(x, "SpatialField"))
 	if (x@observations_equal_domain)
 		return(TRUE)
-	(gridded(x@domain@sp) || is(x@domain@sp, "SpatialPolygons")) &&
+	(gridded(x@domain@area) || is(x@domain@area, "SpatialPolygons")) &&
 		isTRUE(all.equal(getArea(x@observations), 
-			getArea(x@domain@sp))) # allows for numerical fuzz
+			getArea(x@domain@area))) # allows for numerical fuzz
 }
 #' compute area of a Spatial* object
 #'
@@ -113,6 +133,7 @@ full.coverage = function(x) {
 #'
 #' area of gridded or polygon objects deriving from \link[sp]{Spatial}, zero
 #' for other classes (points, lines)
+#' @usage getArea(x)
 #'
 #' @param x object of a subclass of \link[sp]{Spatial}
 #' @return the area of the features (grid cells or polygons) in the object
@@ -139,4 +160,24 @@ getArea = function(x) {
 		return(getAreaSP(x))
 	# lines, points:
 	return(0.0)
+}
+#' plot method for SpatialField objects
+#' 
+#' plot method for SpatialField objects
+#' 
+#' @usage plot(x, ..., bg = grey(0.7))
+#' @param x object of class \link{SpatialField}
+#' @param bg background colour for domain
+#' @export
+#' @examples
+#' library(sp)
+#' demo(meuse, ask = FALSE, echo = FALSE)
+#' plot(SpatialField(meuse, meuse.grid))
+#' plot(SpatialField(meuse, meuse.area))
+plot.SpatialField = function(x,..., bg = grey(0.7)) {
+	if (gridded(x@domain@area))
+		image(x@domain@area, col = bg)
+	else
+		plot(x@domain@area, col = bg)
+	plot(x@observations, add = TRUE, ...)
 }

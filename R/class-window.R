@@ -8,28 +8,28 @@
 #'
 #'@section Slots: 
 #'  \describe{
-#'    \item{\code{sp}}{object of a subclass of \link[sp]{Spatial}}
+#'    \item{\code{area}}{object of a subclass of \link[sp]{Spatial}}
 #'  }
 #'
 #' @usage Window(...)
 #' @param ... named parameter, containing 
 #'  \describe{
-#'    \item{\code{sp}}{object of a subclass of \link[sp]{Spatial}}
+#'    \item{\code{area}}{object of a subclass of \link[sp]{Spatial}}
 #'  }
 #' @return object of class \link{Window}
 #'
-#' @note if \code{sp} is not of (a subclass of) class \link[sp]{SpatialPolygons}, \link[sp]{SpatialPixels}, or \link[sp]{SpatialGrid}, an error results.
+#' @note if \code{area} is not of (a subclass of) class \link[sp]{SpatialPolygons}, \link[sp]{SpatialPixels}, or \link[sp]{SpatialGrid}, an error results.
 #' @name Window
 #' @rdname Window
 #' @aliases Window-class
 #' @exportClass Window
 #' @export Window
 #' @author Edzer Pebesma
-Window = setClass("Window", slots = c(sp = "Spatial"))
+Window = setClass("Window", slots = c(area = "Spatial"))
 #' initializes (creates) Window objects
 #'
 #' @param .Object (ignore)
-#' @param sp object of one of the sublasses of \link[sp]{Spatial}
+#' @param area object of one of the sublasses of \link[sp]{Spatial}
 #'
 #' @return object of class \link{Window-class}
 #' @note this function should not be called directly, use \link{Window} instead
@@ -37,13 +37,13 @@ Window = setClass("Window", slots = c(sp = "Spatial"))
 #' @export
 #' @docType methods
 #' @rdname initialize-Window-methods
-setMethod("initialize", "Window", function(.Object, sp) {
+setMethod("initialize", "Window", function(.Object, area) {
 	.Object <- callNextMethod()
-	if (missing(sp))
-		stop("sp argument needs to be supplied")
-	stopifnot(is(sp, "Spatial")) # should be automatic
-	if (!(gridded(sp) || is(sp, "SpatialPolygons")))
+	if (missing(area))
+		stop("area argument needs to be supplied")
+	stopifnot(is(area, "Spatial")) # should be automatic
+	if (!(gridded(area) || is(area, "SpatialPolygons")))
 		stop("Window object needs to reflect an area, as grid or polygons")
-	.Object@sp = sp
+	.Object@area = area
 	.Object
 })

@@ -12,11 +12,9 @@
 #'    anything but \code{SpatialPoints}}
 #'  }
 #'
-#' @usage SpatialAggregation(...)
-#' @param ... named arguments, according to the following list:
-#'  \describe{
-#'    \item{sp}{object of one of the sublasses of \link{Spatial}; see above}
-#'  }
+#' @usage SpatialAggregation(sp)
+#' @param sp object of one of the sublasses of \link{Spatial},
+#'    anything but \code{SpatialPoints}
 #'
 #' @return object of class \link{SpatialAggregation-class}
 
@@ -35,9 +33,17 @@
 #' nc = readShapePoly(fname, proj4string=CRS("+proj=longlat +datum=NAD27"))
 #' sa = SpatialAggregation(nc)
 #' # has aggregated quantities, except for CNTY_, CNTY_ID, FIPS, FIPSNO, NAME
-SpatialAggregation = setClass("SpatialAggregation", slots = c(sp = "Spatial"),
+#' library(sp)
+#' demo(meuse, ask = FALSE, echo = FALSE)
+#' try(SpatialAggregation, meuse)
+#' plot(SpatialAggregation(meuse.area))
+setClass("SpatialAggregation", slots = c(observations = "Spatial"),
 	validity = function(object) { 
-		stopifnot(!(class(object@sp) %in% c("SpatialPoints", "SpatialPointsDataFrame")))
+		if (class(object@observations) %in% c("SpatialPoints", "SpatialPointsDataFrame"))
+			stop("SpatialAggregation need to have as geometry: lines, grid, or polygons")
 		return(TRUE)
 	}
 )
+SpatialAggregation = function(observations) {
+	new("SpatialAggregation", observations = observations)
+}

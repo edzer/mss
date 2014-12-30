@@ -5,12 +5,12 @@
 \alias{initialize,Window-method}
 \title{initializes (creates) Window objects}
 \usage{
-\S4method{initialize}{Window}(.Object, sp)
+\S4method{initialize}{Window}(.Object, area)
 }
 \arguments{
 \item{.Object}{(ignore)}
 
-\item{sp}{object of one of the sublasses of \link[sp]{Spatial}}
+\item{area}{object of one of the sublasses of \link[sp]{Spatial}}
 }
 \value{
 object of class \link{Window-class}

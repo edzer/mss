@@ -70,7 +70,7 @@ setMethod("initialize", "SpatialField", function(.Object, observations, domain) 
 			domain = Window(domain)
 		else stopifnot(is(domain, "Window"))
 #		check all features are inside domain here?
-		if (any(is.na(over(observations, domain@sp))))
+		if (any(is.na(over(observations, domain@area))))
 			warning("some observations are outside the domain", call. = FALSE)
 	}
 	.Object@observations = observations

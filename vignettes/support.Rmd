@@ -32,11 +32,11 @@ meuse[1:5, 1:5]
 we can define for instance a window for the observation points data 
 set by the `meuse.grid` data,
 ```{r}
-w2 = Window(sp = meuse.grid) # note the grid is passed, not the polygons
+w2 = Window(area = meuse.grid) # note the grid is passed, not the polygons
 ```
 or by using the area as single polygon:
 ```{r}
-w1 = Window(sp = meuse.area)
+w1 = Window(area = meuse.area)
 ```
 
 We define spatial data objects as having support, and either having
@@ -59,7 +59,7 @@ spplot(i1, "var1.pred")
 or we can predict the polygon area mean value:
 ```{r}
 library(rgeos)
-m2 = SpatialAggregation(sp = meuse.area)
+m2 = SpatialAggregation(meuse.area)
 i2 = interpolate(log(zinc)~1, m, m2) # interpolate from point TO polygon support
 i2$var1.pred # a single value, estimate of mean for the whole area
 mean(log(m$zinc)) # sample mean
@@ -74,7 +74,7 @@ print(as(i3[1:3,], "data.frame"), digits = 10) # point support
 ```
 or predict values for cell means:
 ```{r}
-m4 = SpatialAggregation(sp = meuse.grid)
+m4 = SpatialAggregation(meuse.grid)
 i4 = interpolate(log(zinc)~1, m, m4) # interpolate from point TO feature (cell) support
 print(as(i4[1:3,], "data.frame"), digits = 10) # grid cells support
 spplot(i4, "var1.pred")
@@ -115,15 +115,15 @@ as case (...) above, we can predict a mean value for a grid cell by
 ```{r}
 gt = GridTopology(cellcentre.offset = c(.25,.25), cellsize = c(1,1), cells.dim = c(1,1))
 grd.red = SpatialGrid(gt)
-i7 = interpolate(r~1, sf, SpatialAggregation(sp = grd.red))
-i7@sp@data
+i7 = interpolate(r~1, sf, SpatialAggregation(grd.red))
+i7@observations@data
 ```
 
 
 ## area-to-point kriging
 ```{r}
 sp = as(sgdf, "SpatialPolygonsDataFrame")
-gf = SpatialAggregation(sp = sp)
+gf = SpatialAggregation(sp)
 library(gstat)
 kr = interpolate(r~1, gf, SpatialField(pt.red, sp), 
 	vgm = vgm(1, "Exp", 5, 0))
@@ -139,13 +139,13 @@ grd = addAttrToGeom(gr, data.frame(r=0), FALSE)
 plot(as(sgdf, "SpatialPolygons"), axes = TRUE)
 text(coordinates(sgdf), labels = sgdf[[1]])
 plot(grd, add = TRUE, border = 'red')
-kr = interpolate(r~1, gf, SpatialAggregation(sp = grd), 
+kr = interpolate(r~1, gf, SpatialAggregation(grd), 
 	vgm = vgm(1, "Exp", 5, 0))
-kr@sp[[1]]
+kr@observations[[1]]
 krige0(r ~ 1, sp, grd, vgm_area, vgm = vgm(1, "Exp", 5, 0))
 ```
 
-## density for entitities
+## Estimating density from entitities
 ```{r}
 e = SpatialEntities(meuse, meuse.area)
 d = density(e, newdata = meuse.grid)
@@ -154,27 +154,28 @@ lt = list(list("sp.polygons", meuse.area, border = 'black',
 spplot(d, sp.layout = lt)
 ```
 
-## aggregate: meaningful
-generate warnings of mip/mss
-
-## TODOs
-* verify that SpatialPixel objects do not have anyDuplicated(x@grid.index), for domain, or sp
-* think functional support through: is it needed? How does it link to predict.gstat?
-* grid cells: (i) constant value in grid cells: support = "point";
-(ii) single value for aggregate of grid cell: support = "feature";
-(iii) single value only valid for grid cell centre: object needs
-to be coercer to SpatialPoints and support = "point"
-* check whether multiple polygons work!
-* check whether observations match domain
-
-## functional support
+## Spatial aggregation of `SpatialField` data
 ```{r}
-f4x4 = function(size) {
-	grd = size * expand.grid(x = c(-3, -1, 1, 3), y = c(-3, -1, 1, 3)) / 8
-	n = nrow(grd)
-	function(x = 0, y = 0) as.matrix(cbind(rep(x,n),rep(y,n)) + grd)
-}
-f = f4x4(2)
-f() # centered at (0,0)
-f(10,5) # centered at (10,5)
+m = SpatialField(meuse["zinc"], meuse.area)
+a = aggregate(m, SpatialAggregation(meuse.area), mean) # no warning
+a[[1]]
+a = aggregate(m, SpatialAggregation(meuse.area), sum) # warns:
+a[[1]]
 ```
+
+## Spatial aggregation of `SpatialEntity` data
+```{r}
+m = SpatialEntities(meuse["zinc"], meuse.area)
+a = aggregate(m, SpatialAggregation(meuse.area), mean) # warns:
+a[[1]]
+a = aggregate(m, SpatialAggregation(meuse.area), sum) # no warning
+a[[1]]
+x = bbox(meuse)[1,]
+y = bbox(meuse)[2,]
+bb = Polygon(cbind(c(x[1],x[1],x[2],x[2],x[1]), c(y[1],y[2],y[2],y[1],y[1])))
+bbx = SpatialPolygons(list(Polygons(list(bb),"bbox_meuse")),
+	proj4string = CRS(proj4string(meuse)))
+a = aggregate(m, SpatialAggregation(bbx), sum) # warns:
+```
+
+

@@ -67,7 +67,7 @@ setMethod("initialize", "SpatialEntities", function(.Object,
 	} else { # window specified
 		if (is(window, "Spatial"))
 			window = Window(window)
-		if (any(is.na(over(observations, window@sp))))
+		if (any(is.na(over(observations, window@area))))
 			warning("some observations are outside the window", call. = FALSE)
 	}
 	.Object@observations = observations

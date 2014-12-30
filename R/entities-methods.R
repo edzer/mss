@@ -40,3 +40,23 @@ density.SpatialEntities = function(x, bandwidth, newdata, ncells = 5000, ...) {
 	fullgrid(a) = fullgrid(newdata) # if wanted, coerce to SpatialPixelsDataFrame
 	SpatialField(a, newdata)
 }
+#' plot method for SpatialEntities objects
+#' 
+#' plot method for SpatialEntities objects
+#' 
+#' @usage plot(x, ..., bg = grey(0.7))
+#' @param x object of class \link{SpatialEntities}
+#' @param bg background colour for observation window
+#' @export
+#' @examples
+#' library(sp)
+#' demo(meuse, ask = FALSE, echo = FALSE)
+#' plot(SpatialField(meuse, meuse.grid))
+#' plot(SpatialField(meuse, meuse.area))
+plot.SpatialEntities = function(x,..., bg = grey(0.7)) {
+	if (gridded(x@window@sp))
+		image(x@window@sp, col = bg)
+	else
+		plot(x@window@sp, col = bg)
+	plot(x@observations, add = TRUE, ...)
+}

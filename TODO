@@ -12,3 +12,26 @@ coercion ppp <--> PointPatternDataFrame
 document exported classes
 
 do all classes need ObservationWindows? (geost, lattice: no?)
+
+# Tue Dec 30 17:20:27 CET 2014
+## TODOs
+* verify that SpatialPixel objects do not have anyDuplicated(x@grid.index), for domain, or sp
+* think functional support through: is it needed? How does it link to predict.gstat?
+* grid cells: (i) constant value in grid cells: support = "point";
+(ii) single value for aggregate of grid cell: support = "feature";
+(iii) single value only valid for grid cell centre: object needs
+to be coercer to SpatialPoints and support = "point"
+* check whether multiple polygons work!
+* check whether observations match domain
+
+## functional support
+```{r}
+f4x4 = function(size) {
+	grd = size * expand.grid(x = c(-3, -1, 1, 3), y = c(-3, -1, 1, 3)) / 8
+	n = nrow(grd)
+	function(x = 0, y = 0) as.matrix(cbind(rep(x,n),rep(y,n)) + grd)
+}
+f = f4x4(2)
+f() # centered at (0,0)
+f(10,5) # centered at (10,5)
+```
