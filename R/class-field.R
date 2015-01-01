@@ -64,6 +64,7 @@ setMethod("initialize", "SpatialField", function(.Object, observations, domain) 
 	if (missing(domain)) {
 		domain = Window(observations)
 		.Object@observations_equal_domain = TRUE
+		mss("domain was set to the observations' geometry")
 	} else {
 		.Object@observations_equal_domain = FALSE
 		if (is(domain, "Spatial"))
@@ -71,7 +72,7 @@ setMethod("initialize", "SpatialField", function(.Object, observations, domain) 
 		else stopifnot(is(domain, "Window"))
 #		check all features are inside domain here?
 		if (any(is.na(over(observations, domain@area))))
-			warning("some observations are outside the domain", call. = FALSE)
+			not_meaningful("having observations outside the domain")
 	}
 	.Object@observations = observations
 	.Object@domain = domain

@@ -18,13 +18,13 @@
 #' @export density
 density.SpatialEntities = function(x, bandwidth, newdata, ncells = 5000, ...) {
 	if (missing(newdata)) {
-		newdata = x@window@sp
+		newdata = x@window@area
 		if (!gridded(newdata)) {
 			newdata = spsample(newdata, ncells, "regular")
 			gridded(newdata) = TRUE
 		}
 	} else if (is(newdata, "SpatialField"))
-		newdata = newdata@sp
+		newdata = newdata@observations
 	if (!requireNamespace("MASS", quietly = TRUE))
 		stop("package MASS required")
 
@@ -60,3 +60,9 @@ plot.SpatialEntities = function(x,..., bg = grey(0.7)) {
 		plot(x@window@sp, col = bg)
 	plot(x@observations, add = TRUE, ...)
 }
+setMethod("interpolate", c("formula", "SpatialEntities", "ANY"),
+	function(formula, data, newdata, ...) {
+		not_meaningful("interpolation of SpatialEntities")
+		data
+	}
+)

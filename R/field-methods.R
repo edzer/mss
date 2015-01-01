@@ -26,6 +26,8 @@ setMethod("interpolate", c("formula", "SpatialField", "SpatialField"),
 	function(formula, data, newdata, ...) {
 		if (any(is.na(over(newdata@observations, data@domain@area))))
 			not_meaningful("interpolation outside the observation domain")
+		#if (area_extends_window(newdata@domain@area, data@domain))
+		#	not_meaningful("interpolating over an area larger than the domain")
 		if (full.coverage(data)) {
 			stopifnot(is(newdata@observations, "SpatialPoints"))
 			SpatialField(addAttrToGeom(newdata@observations, 
@@ -54,6 +56,8 @@ setMethod("interpolate", c("formula", "SpatialField", "SpatialAggregation"),
 			not_meaningful("interpolation outside the data domain")
 		if (!requireNamespace("gstat", quietly = TRUE))
 			stop("package gstat required")
+		if (area_extends_window(newdata@observations, data@domain))
+			not_meaningful("interpolating over an area larger than the domain")
 		if (gridded(newdata@observations)) {
 			block = gridparameters(newdata@observations)$cellsize
 			SpatialAggregation(gstat::krige(formula, data@observations, 
@@ -66,6 +70,8 @@ setMethod("interpolate", c("formula", "SpatialAggregation", "SpatialField"),
 	function(formula, data, newdata, ...) {
 		if (!requireNamespace("gstat", quietly = TRUE))
 			stop("package gstat required")
+		if (area_extends_window(newdata@observations, Window(data@observations)))
+			not_meaningful("interpolating over an area larger than the domain")
 		var1.pred = gstat::krige0(formula, data@observations, newdata@observations,
 			vgm_area, ...)
 		nd = addAttrToGeom(newdata@observations, data.frame(var1.pred), FALSE)
@@ -76,6 +82,8 @@ setMethod("interpolate", c("formula", "SpatialAggregation", "SpatialAggregation"
 	function(formula, data, newdata, ...) {
 		if (!requireNamespace("gstat", quietly = TRUE))
 			stop("package gstat required")
+		if (area_extends_window(newdata@observations, Window(data@observations)))
+			not_meaningful("interpolating over an area larger than the domain")
 		var1.pred = gstat::krige0(formula, data@observations, newdata@observations,
 			vgm_area, ...)
 		newdata = addAttrToGeom(newdata@observations, data.frame(var1.pred), FALSE)
@@ -83,6 +91,15 @@ setMethod("interpolate", c("formula", "SpatialAggregation", "SpatialAggregation"
 	}
 )
 setMethod("spplot", "SpatialField", function(obj,...) spplot(obj@observations, ...))
+setMethod("over", c("SpatialField", "SpatialField"), 
+	function(x, y, returnList = FALSE, fn = NULL, ...) 
+		over(x@observations,y@observations, returnList, fn, ...))
+setMethod("over", c("SpatialField", "SpatialAggregation"), 
+	function(x, y, returnList = FALSE, fn = NULL, ...) {
+		not_meaningful("deriving field values from aggregations")
+		NULL
+	}
+)
 setMethod("$", "SpatialField", function(x, name) x@observations[[name]])
 setMethod("[", "SpatialField", 
 	function(x, i, j, ..., drop = TRUE) x@observations[i, j, ..., drop = drop])

@@ -3,7 +3,7 @@
 %\VignetteIndexEntry{Spatial and spatio-temporal objects in Google charts}
 -->
 
-# Spatial fields and entities
+# Introduction to the `mss` R package
 
 ```{r}
 library(mss) # meaningful spatial statistics
@@ -22,7 +22,7 @@ The window class defines an area, either represented by a grid or by a polygon:
 showClass("Window")
 ```
 
-After loading the `meuse` data set from `sp`,
+After loading the `meuse` data set from `sp`, we see
 ```{r}
 library(sp)
 demo(meuse, ask = FALSE, echo = FALSE)
@@ -39,14 +39,15 @@ or by using the area as single polygon:
 w1 = Window(area = meuse.area)
 ```
 
-We define spatial data objects as having support, and either having
-an observation window (for entities) or a domain (for fields).
+We define spatial data objects as either fields having an observation
+domain, entities having an observation window, or aggregations:
 ```{r}
 showClass("SpatialField")
 showClass("SpatialEntities")
+showClass("SpatialAggregation")
 ```
 
-## Examples
+## Interpolation
 
 ### interpolation of point support data
 We can predict to points, laid out regularly, inside a polygon
@@ -80,7 +81,7 @@ print(as(i4[1:3,], "data.frame"), digits = 10) # grid cells support
 spplot(i4, "var1.pred")
 ```
 
-## support of the feature
+### Support of the feature
 Suppose we have grid data on a 3 x 3 grid, and
 want to estimate on a new location, indicated by a red
 circle:
@@ -119,8 +120,7 @@ i7 = interpolate(r~1, sf, SpatialAggregation(grd.red))
 i7@observations@data
 ```
 
-
-## area-to-point kriging
+### Area-to-point kriging
 ```{r}
 sp = as(sgdf, "SpatialPolygonsDataFrame")
 gf = SpatialAggregation(sp)
@@ -131,7 +131,7 @@ kr@observations[[1]]
 krige0(r ~ 1, sp, pt.red, vgm_area, vgm = vgm(1, "Exp", 5, 0))
 ```
 
-## grid-to-grid kriging
+### Grid-to-grid kriging
 ```{r}
 sp = as(sgdf, "SpatialPolygonsDataFrame")
 gr = as(grd.red, "SpatialPolygons")
@@ -146,6 +146,8 @@ krige0(r ~ 1, sp, grd, vgm_area, vgm = vgm(1, "Exp", 5, 0))
 ```
 
 ## Estimating density from entitities
+For `SpatialEntity` objects, we can estimate the density of objects; this
+method reuses `MASS:kde2d`:
 ```{r}
 e = SpatialEntities(meuse, meuse.area)
 d = density(e, newdata = meuse.grid)
@@ -154,7 +156,9 @@ lt = list(list("sp.polygons", meuse.area, border = 'black',
 spplot(d, sp.layout = lt)
 ```
 
-## Spatial aggregation of `SpatialField` data
+## Spatial Aggregation
+
+### for `SpatialField` data
 ```{r}
 m = SpatialField(meuse["zinc"], meuse.area)
 a = aggregate(m, SpatialAggregation(meuse.area), mean) # no warning
@@ -163,19 +167,109 @@ a = aggregate(m, SpatialAggregation(meuse.area), sum) # warns:
 a[[1]]
 ```
 
-## Spatial aggregation of `SpatialEntity` data
+### for `SpatialEntity` data
 ```{r}
 m = SpatialEntities(meuse["zinc"], meuse.area)
 a = aggregate(m, SpatialAggregation(meuse.area), mean) # warns:
 a[[1]]
 a = aggregate(m, SpatialAggregation(meuse.area), sum) # no warning
 a[[1]]
+```
+
+# Meaningful warnings
+
+Pebesma et al. ([2014](https://agu.confex.com/agu/fm14/meetingapp.cgi#Paper/3289))
+make assertions A1-A7. 
+
+## A1. 
+**A prediction is meaningful, if it provides an estimate for a potential observation
+Prediction on a field variable generates no warning.**
+
+Where prediction of a `SpatialField` varialbe generates no warning,
+```{r}
+m = SpatialField(meuse, meuse.area) # data are point support
+i1 = interpolate(log(zinc)~1, m) # interpolate from point TO point support
+```
+prediction of a point pattern variable generates a warning:
+```{r}
+m = SpatialEntities(meuse, meuse.area)
+sa = SpatialAggregation(meuse.grid)
+i1 = interpolate(log(zinc)~1, m, sa) # interpolate point pattern variable: warns
+```
+## A2. 
+**Summing up values over an area is meaningful, if the observed window corresponds to the target geometry (grouping predicate) of the aggregation.**
+
+For `SpatialEntity` data, spatial aggregation over an area larger than the 
+observation window generates a warning:
+```{r}
 x = bbox(meuse)[1,]
 y = bbox(meuse)[2,]
 bb = Polygon(cbind(c(x[1],x[1],x[2],x[2],x[1]), c(y[1],y[2],y[2],y[1],y[1])))
 bbx = SpatialPolygons(list(Polygons(list(bb),"bbox_meuse")),
 	proj4string = CRS(proj4string(meuse)))
+m = SpatialEntities(meuse["zinc"], meuse.area)
 a = aggregate(m, SpatialAggregation(bbx), sum) # warns:
 ```
+Stasch et al. [2014](http://www.sciencedirect.com/science/article/pii/S1364815213001977)
+more formally prove A1 and A2.
 
+Further assertions in the poster:
+## A3.
+**Polygon data may reflect constant values over areas (geology) or means (population density), this matters for (further) aggregation or downsampling.**
 
+Package `mss` distinguishes between `SpatialField` and
+`SpatialAggregations` to represent constant values, and aggregations,
+respectively. Subsampling `SpatialField` variabls does not not warn,
+```{r}
+area = addAttrToGeom(meuse.area, data.frame(v=1), match.ID = FALSE)
+f = SpatialField(area, meuse.area)
+pts = SpatialField(meuse, meuse.area)
+x1 = over(pts, f)
+```
+but subsampling `SpatialAggregation` variables triggers a warning:
+```{r}
+a = SpatialAggregation(area)
+x2 = over(pts, a)
+```
+
+## A4.
+**The same is true for grid cells.**
+
+`SpatialField` and `SpatialAggregation` both generalize polygon and grid data:
+```{r}
+f = SpatialField(meuse.grid, meuse.area)
+pts = SpatialField(meuse, meuse.area)
+a = SpatialAggregation(meuse.grid)
+x1 = over(pts, f)
+x2 = over(pts, a)
+```
+
+## A5. 
+**Point pattern data often come without observation window, over which aggregation is meaningful**
+
+Attempting to create a `SpatialEntities` object without an observation window leads to a warning, followed by an error:
+```{r}
+tr = try(pts <- SpatialEntities(meuse))
+attr(tr, "condition")
+```
+
+## A6. 
+**Field measurements often come without a notion for which locations interpolations based on them make sense.**
+
+```{r}
+m = SpatialField(meuse["zinc"], meuse.area)
+a = interpolate(log(zinc)~1, m, SpatialAggregation(bbx)) # warns:
+```
+
+## A7. 
+**File types do not inform on meaningfulness**
+
+`SpatialPoints`, `SpatialPixels`, `SpatialGrid`, `SpatialLines`,
+`SpatialPolygons` and their `*DataFrame` counterparts do not inform
+whether data concern fields (geostatistical data), entities (point
+patterns), or aggregations. The classes in `mss`: `SpatialField`,
+`SpatialEntities`, and `SpatialAggregation`, do.
+
+## References
+1. Edzer Pebesma, Christoph Stasch, Benedikt Gr\"aler and Simon Scheider, 2014.  Meaningfully Integrating Big Earth Science Data; AGU fall meeting, poster [IN33A-3757](https://agu.confex.com/agu/fm14/meetingapp.cgi#Paper/3289) [pdf](https://agu.confex.com/data/handout/agu/fm14/Paper_3289_handout_1504_0.pdf)
+2. Stasch, C., S. Scheider, E. Pebesma, W. Kuhn, 2014.  Meaningful Spatial Prediction and Aggregation.  Environmental Modelling \& Software, 51, 149-165 [open access](http://www.sciencedirect.com/science/article/pii/S1364815213001977).

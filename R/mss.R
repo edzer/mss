@@ -33,3 +33,29 @@ mss = function(x, what = "") {
 not_meaningful = function(x) mss(x, "is not considered meaningful")
 
 maybe_meaningful = function(x) mss(x, "may not be meaningful")
+
+.onAttach = function(libname, pkgname) {
+	packageStartupMessage(
+	"mss functions assume grid data reflect raster cell area, not point geometries")
+}
+
+area_extends_window = function(o, w) {
+	#if (gridded(w@area))
+	#	w@area = as(w@area, "SpatialPolygons")
+	if (is(w@area, "SpatialPolygons")) {
+		#if (gridded(o))
+		#	o = as(o, "SpatialPolygons")
+		if (is(o, "SpatialPolygons")) {
+			if (!requireNamespace("rgeos", quietly = TRUE)) {
+				mss("for comparing aggregation areas/domain/window, package rgeos required")
+				return(FALSE) # can't tell!
+			}
+			diff = rgeos::gDifference(gUnionCascaded(o), gUnionCascaded(w@area))
+			return(!is.null(diff) && getArea(diff) > sqrt(.Machine$double.eps))
+		}
+		# if o is SpatialLines, do here something better;
+		# for SpatialPoints:
+		return(any(is.na(over(o, w@area))))
+	}
+	FALSE
+}
