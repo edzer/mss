@@ -27,7 +27,8 @@ SpatialEntities: a Class for Spatial Entities (Objects)
 \details{
 A class to store spatial entities, such as trees, buildings and so on,
 along with the observed window, the area for which the set of
-entities is exhaustive
+entities is exhaustive. It is assumed that for all points in the
+observed window where there are no objects, the space is known to be empty.
 }
 \note{
 If no window is supplied, the window is set to the collection of features, and a warning is issued. Support is assumed to be that of the features (points, polygons, lines, grid cells) in the \code{observations} object.

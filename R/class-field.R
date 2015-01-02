@@ -6,20 +6,30 @@
 #' land use, and so on, which have point support (footprint), along with the
 #' domain for which the set observation are valid e.g. to make interpolations.
 #'
+#' Fields are representations of continuous phenomena: at every point in continuous
+#' space, a value exists. Observations on fields are, by necessity, discrete and
+#' countable when they refer to points, but may also consist of areas in which case
+#' an infinite number of points with constant value in the area is represented.
+#'
+#' SpatialField objects can be generated from points, lines, polygons or grids. For
+#' all classes except points, the attribute values are assumed to be constant and
+#' identical for all points along the line (lines), or over the area (polygons, grids).
+#'
+#' The domain of a SpatialField object is the area for which the observations are
+#' considered relevant, e.g. by affording interpolation or aggregation.
+#'
 #'@section Slots: 
 #'  \describe{
-#'    \item{\code{observations}}{object of a subclass of \link[sp]{Spatial}}
-#'    \item{\code{domain}}{object of class \link{Window}}
-#'    \item{\code{observations_equal_domain}}{logical; are the \code{observations} identical to the \code{domain}?}
+#'    \item{\code{observations}:}{object of a subclass of \link[sp]{Spatial}}
+#'    \item{\code{domain}:}{object of class \link{Window}}
+#'    \item{\code{observations_equal_domain}:}{logical; are the \code{observations} identical to the \code{domain}?}
 #'  }
 #'
 #' @usage SpatialField(...)
 #' @param ... named arguments, according to the following list:
 #'  \describe{
-#'    \item{observations}{object of one of the sublasses of \link[sp]{Spatial}}
-#'    \item{domain}{object of class \link{Window}, or of a subclass of \link[sp]{Spatial} (typically: \link[sp]{SpatialPolygons}, \link[sp]{SpatialPixels} or \link[sp]{SpatialGrid})}
-#'    \item{observations_equal_domain}{logical; indicates whether the
-#'    \code{observations} are identical to the domain}
+#'    \item{observations:}{object of one of the sublasses of \link[sp]{Spatial}}
+#'    \item{domain:}{object of class \link{Window}, or of a subclass of \link[sp]{Spatial} (typically: \link[sp]{SpatialPolygons}, \link[sp]{SpatialPixels} or \link[sp]{SpatialGrid}); if omitted, taken to be identical to \code{observations}}
 #'  }
 #'
 #' @return object of class \link{SpatialField-class}

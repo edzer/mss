@@ -3,33 +3,34 @@
 %\VignetteIndexEntry{Spatial and spatio-temporal objects in Google charts}
 -->
 
-# Introduction to the `mss` R package
+# Meaningful Spatial Statistics: The `mss` R Package
 
 ```{r}
 library(mss) # meaningful spatial statistics
 ```
 
 ## Support, Domain, and Observation Window
-This document introduces two classes for spatial data: `SpatialField`
-and `SpatialEntities`, for representing spatial fields, and entities,
-respectively. For both, the support of the variable is explicitly tracked. 
-Support refers to the physical size of data (observations or model
-predictions). A synonym for support is _footprint_.
+This document introduces three classes for spatial data:
+`SpatialField` and `SpatialEntities`, for representing spatial
+fields, and entities, respectively, and `SpatialAggregation` for
+spatial aggregations over fields and/or entities. 
 
 # Domain and observation windows
 The window class defines an area, either represented by a grid or by a polygon:
 ```{r}
 showClass("Window")
 ```
+and it is used to define a domain for a `SpatialField` object, or the
+observation window for a `SpatialEntities` object.
 
-After loading the `meuse` data set from `sp`, we see
+After loading `sp`, we can import several objects
+related to the `meuse` data set:
 ```{r}
 library(sp)
 demo(meuse, ask = FALSE, echo = FALSE)
 sapply(ls(), function(x) class(get(x)))
-meuse[1:5, 1:5]
 ```
-we can define for instance a window for the observation points data 
+we can define a window for the observation points data 
 set by the `meuse.grid` data,
 ```{r}
 w2 = Window(area = meuse.grid) # note the grid is passed, not the polygons
@@ -211,7 +212,7 @@ m = SpatialEntities(meuse["zinc"], meuse.area)
 a = aggregate(m, SpatialAggregation(bbx), sum) # warns:
 ```
 Stasch et al. [2014](http://www.sciencedirect.com/science/article/pii/S1364815213001977)
-more formally prove A1 and A2.
+prove A1 and A2 more formally.
 
 Further assertions in the poster:
 ## A3.
@@ -271,5 +272,5 @@ patterns), or aggregations. The classes in `mss`: `SpatialField`,
 `SpatialEntities`, and `SpatialAggregation`, do.
 
 ## References
-1. Edzer Pebesma, Christoph Stasch, Benedikt Gr\"aler and Simon Scheider, 2014.  Meaningfully Integrating Big Earth Science Data; AGU fall meeting, poster [IN33A-3757](https://agu.confex.com/agu/fm14/meetingapp.cgi#Paper/3289) [pdf](https://agu.confex.com/data/handout/agu/fm14/Paper_3289_handout_1504_0.pdf)
+1. E. Pebesma, C. Stasch, B. Gräler and S. Scheider, 2014.  Meaningfully Integrating Big Earth Science Data; AGU fall meeting, poster [IN33A-3757](https://agu.confex.com/agu/fm14/meetingapp.cgi#Paper/3289) [pdf](https://agu.confex.com/data/handout/agu/fm14/Paper_3289_handout_1504_0.pdf)
 2. Stasch, C., S. Scheider, E. Pebesma, W. Kuhn, 2014.  Meaningful Spatial Prediction and Aggregation.  Environmental Modelling \& Software, 51, 149-165 [open access](http://www.sciencedirect.com/science/article/pii/S1364815213001977).

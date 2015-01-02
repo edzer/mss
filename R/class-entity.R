@@ -4,7 +4,8 @@
 #'
 #' A class to store spatial entities, such as trees, buildings and so on,
 #' along with the observed window, the area for which the set of
-#' entities is exhaustive
+#' entities is exhaustive. It is assumed that for all points in the 
+#' observed window where there are no objects, the space is known to be empty.
 #'
 #'@section Slots: 
 #'  \describe{

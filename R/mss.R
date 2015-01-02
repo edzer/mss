@@ -1,5 +1,10 @@
 # general declarations
 
+#.onAttach = function(libname, pkgname) {
+#	packageStartupMessage(
+#	"mss functions assume grid data reflect raster cell area, not point geometries")
+#}
+
 .mssOptions <- new.env(FALSE, globalenv())
 assign("mss_error", FALSE, envir = .mssOptions)
 
@@ -33,11 +38,6 @@ mss = function(x, what = "") {
 not_meaningful = function(x) mss(x, "is not considered meaningful")
 
 maybe_meaningful = function(x) mss(x, "may not be meaningful")
-
-.onAttach = function(libname, pkgname) {
-	packageStartupMessage(
-	"mss functions assume grid data reflect raster cell area, not point geometries")
-}
 
 area_extends_window = function(o, w) {
 	#if (gridded(w@area))

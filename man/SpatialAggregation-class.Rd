@@ -27,6 +27,14 @@ SpatialAggregation: a Class for Spatial Aggregations (Area data)
 A class to store spatial aggregations, such as population densities or grid maps;
 spatial aggregations are (single) values that have reference to an area, e.g.
 the maximum, average, or sum over an area.
+
+Aggregation values are values that refer to an area (polygon, grid cell), or line,
+as a whole: the values cannot be interpreted as the value at any given point in
+an area or on a line; these individual values may be recovered by estimation
+(area-to-point interpolation), but in principle got lost by aggregation. Aggregation
+may be integral to observation (e.g., remote sensing pixels refer to values aggregated
+over an area similar to the pixel), or a result from spatially aggregating data,
+e.g. from using \link{aggregate}.
 }
 \note{
 The domain for spatial aggregations is identical to the geometry covered by its geometry. The support of the aggregation is identical to its features (grid cells/pixels, polygons).
