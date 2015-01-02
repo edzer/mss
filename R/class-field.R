@@ -26,7 +26,7 @@
 
 #' @name SpatialField-class
 #' @rdname SpatialField-class
-#' @aliases $,SpatialField-method spplot,SpatialField-method [,SpatialField-method SpatialField-class
+#' @aliases $,SpatialField-method spplot,SpatialField-method [,SpatialField-method [[,SpatialField,ANY,missing-method [[<-,SpatialField,ANY,missing-method SpatialField-class over,SpatialField,SpatialField-method over,SpatialField,SpatialAggregation-method 
 #' @exportClass SpatialField
 #' @export SpatialField
 #' @author Edzer Pebesma

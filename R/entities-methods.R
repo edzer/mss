@@ -3,8 +3,6 @@
 #' density estimate for SpatialEntities data
 #'
 #' @aliases density density.SpatialEntities
-#' @usage density(x, ...)
-#' @usage density.SpatialEntities(x, bandwidth, newdata, ncells = 5000, ...)
 #' @param x object of class \link{SpatialEntities-class}
 #' @param bandwidth bandwidth parameter (see \link[MASS]{kde2d})
 #' @param newdata target grid; if omitted, a grid over the window is created
@@ -16,6 +14,7 @@
 #' 
 #' @export density.SpatialEntities
 #' @export density
+#' @export
 density.SpatialEntities = function(x, bandwidth, newdata, ncells = 5000, ...) {
 	if (missing(newdata)) {
 		newdata = x@window@area
@@ -40,29 +39,13 @@ density.SpatialEntities = function(x, bandwidth, newdata, ncells = 5000, ...) {
 	fullgrid(a) = fullgrid(newdata) # if wanted, coerce to SpatialPixelsDataFrame
 	SpatialField(a, newdata)
 }
-#' plot method for SpatialEntities objects
-#' 
-#' plot method for SpatialEntities objects
-#' 
-#' @usage plot(x, ..., bg = grey(0.7))
-#' @param x object of class \link{SpatialEntities}
-#' @param bg background colour for observation window
+#' @rdname interpolate
 #' @export
-#' @examples
-#' library(sp)
-#' demo(meuse, ask = FALSE, echo = FALSE)
-#' plot(SpatialField(meuse, meuse.grid))
-#' plot(SpatialField(meuse, meuse.area))
-plot.SpatialEntities = function(x,..., bg = grey(0.7)) {
-	if (gridded(x@window@sp))
-		image(x@window@sp, col = bg)
-	else
-		plot(x@window@sp, col = bg)
-	plot(x@observations, add = TRUE, ...)
-}
 setMethod("interpolate", c("formula", "SpatialEntities", "ANY"),
 	function(formula, data, newdata, ...) {
 		not_meaningful("interpolation of SpatialEntities")
 		data
 	}
 )
+setMethod("[[", c("SpatialEntities", "ANY", "missing"), double_bracket)
+setReplaceMethod("[[", c("SpatialEntities", "ANY", "missing", "ANY"), double_bracket_repl)

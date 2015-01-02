@@ -4,6 +4,9 @@
 \name{SpatialEntities-class}
 \alias{SpatialEntities}
 \alias{SpatialEntities-class}
+\alias{[,SpatialEntities-method}
+\alias{[[,SpatialEntities,ANY,missing-method}
+\alias{[[<-,SpatialEntities,ANY,missing-method}
 \title{The SpatialEntities class and constructor function}
 \usage{
 SpatialEntities(...)

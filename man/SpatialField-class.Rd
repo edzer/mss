@@ -6,6 +6,10 @@
 \alias{SpatialField}
 \alias{SpatialField-class}
 \alias{[,SpatialField-method}
+\alias{[[,SpatialField,ANY,missing-method}
+\alias{[[<-,SpatialField,ANY,missing-method}
+\alias{over,SpatialField,SpatialAggregation-method}
+\alias{over,SpatialField,SpatialField-method}
 \alias{spplot,SpatialField-method}
 \title{The SpatialField class and constructor function}
 \usage{

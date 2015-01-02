@@ -8,19 +8,19 @@
 #'
 #'@section Slots: 
 #'  \describe{
-#'    \item{\code{sp}}{object of a subclass of \link[sp]{Spatial}; needs to be
+#'    \item{\code{observations}}{object of a subclass of \link[sp]{Spatial}; needs to be
 #'    anything but \code{SpatialPoints}}
 #'  }
 #'
-#' @usage SpatialAggregation(sp)
-#' @param sp object of one of the sublasses of \link{Spatial},
+#' @usage SpatialAggregation(observations)
+#' @param observations object of one of the sublasses of \link{Spatial},
 #'    anything but \code{SpatialPoints}
 #'
 #' @return object of class \link{SpatialAggregation-class}
 
 #' @name SpatialAggregation-class
 #' @rdname SpatialAggregation-class
-#' @aliases $,SpatialAggregation-method spplot,SpatialAggregation-method [,SpatialAggregation-method SpatialAggregation-class
+#' @aliases $,SpatialAggregation-method spplot,SpatialAggregation-method [,SpatialAggregation-method [[,SpatialAggregation,ANY,missing-method [[<-,SpatialAggregation,ANY,missing-method SpatialAggregation-class SpatialAggregation
 #' @exportClass SpatialAggregation
 #' @export SpatialAggregation
 #' @author Edzer Pebesma
@@ -35,7 +35,7 @@
 #' # has aggregated quantities, except for CNTY_, CNTY_ID, FIPS, FIPSNO, NAME
 #' library(sp)
 #' demo(meuse, ask = FALSE, echo = FALSE)
-#' try(SpatialAggregation, meuse)
+#' try(x <- SpatialAggregation(meuse))
 #' plot(SpatialAggregation(meuse.area))
 setClass("SpatialAggregation", slots = c(observations = "Spatial"),
 	validity = function(object) { 

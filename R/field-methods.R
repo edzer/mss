@@ -1,6 +1,5 @@
 #' Method interpolate
 #' @name interpolate
-#' @rdname interpolate-methods
 #' @exportMethod interpolate
 if (!isGeneric("interpolate"))
 	setGeneric("interpolate", function(formula, data, newdata, ...)
@@ -19,9 +18,10 @@ if (!isGeneric("interpolate"))
 #' 
 #' @seealso \link[gstat]{krige}
 #' 
+#' @rdname interpolate
 #' @export
 #' @docType methods
-#' @rdname interpolate-methods
+#' @aliases interpolate,formula,SpatialField,SpatialField-method interpolate,formula,SpatialField,missing-method interpolate,formula,SpatialField,SpatialAggregation-method interpolate,formula,SpatialAggregation,SpatialField-method interpolate,formula,SpatialAggregation,SpatialAggregation-method
 setMethod("interpolate", c("formula", "SpatialField", "SpatialField"),
 	function(formula, data, newdata, ...) {
 		if (any(is.na(over(newdata@observations, data@domain@area))))
@@ -41,6 +41,8 @@ setMethod("interpolate", c("formula", "SpatialField", "SpatialField"),
 		}
 	}
 )
+#' @rdname interpolate
+#' @export
 setMethod("interpolate", c("formula", "SpatialField", "missing"),
 	function(formula, data, newdata, ..., ncells = 5000) {
 		newdata = data@domain@area
@@ -50,6 +52,8 @@ setMethod("interpolate", c("formula", "SpatialField", "missing"),
 		}
 		interpolate(formula, data, SpatialField(newdata), ...)
 })
+#' @rdname interpolate
+#' @export
 setMethod("interpolate", c("formula", "SpatialField", "SpatialAggregation"),
   	function(formula, data, newdata, ..., ncells = 5000) {
 		if (any(is.na(over(newdata@observations, data@domain@area))))
@@ -66,6 +70,8 @@ setMethod("interpolate", c("formula", "SpatialField", "SpatialAggregation"),
 			SpatialAggregation(gstat::krige(formula, data@observations, 
 				newdata@observations, ...))
 })
+#' @rdname interpolate
+#' @export
 setMethod("interpolate", c("formula", "SpatialAggregation", "SpatialField"),
 	function(formula, data, newdata, ...) {
 		if (!requireNamespace("gstat", quietly = TRUE))
@@ -73,11 +79,13 @@ setMethod("interpolate", c("formula", "SpatialAggregation", "SpatialField"),
 		if (area_extends_window(newdata@observations, Window(data@observations)))
 			not_meaningful("interpolating over an area larger than the domain")
 		var1.pred = gstat::krige0(formula, data@observations, newdata@observations,
-			vgm_area, ...)
+			gstat::vgm_area, ...)
 		nd = addAttrToGeom(newdata@observations, data.frame(var1.pred), FALSE)
 		SpatialField(nd, domain = newdata@domain)
 	}
 )
+#' @rdname interpolate
+#' @export
 setMethod("interpolate", c("formula", "SpatialAggregation", "SpatialAggregation"),
 	function(formula, data, newdata, ...) {
 		if (!requireNamespace("gstat", quietly = TRUE))
@@ -85,7 +93,7 @@ setMethod("interpolate", c("formula", "SpatialAggregation", "SpatialAggregation"
 		if (area_extends_window(newdata@observations, Window(data@observations)))
 			not_meaningful("interpolating over an area larger than the domain")
 		var1.pred = gstat::krige0(formula, data@observations, newdata@observations,
-			vgm_area, ...)
+			gstat::vgm_area, ...)
 		newdata = addAttrToGeom(newdata@observations, data.frame(var1.pred), FALSE)
 		SpatialAggregation(newdata)
 	}
@@ -122,10 +130,8 @@ double_bracket_repl = function(x, i, j, value) {
 	x
 }
 setMethod("[[", c("SpatialField", "ANY", "missing"), double_bracket)
-setMethod("[[", c("SpatialEntities", "ANY", "missing"), double_bracket)
 setMethod("[[", c("SpatialAggregation", "ANY", "missing"), double_bracket)
 setReplaceMethod("[[", c("SpatialField", "ANY", "missing", "ANY"), double_bracket_repl)
-setReplaceMethod("[[", c("SpatialEntities", "ANY", "missing", "ANY"), double_bracket_repl)
 setMethod("[[", c("SpatialAggregation", "ANY", "missing"), double_bracket)
 
 #' assess whether function has complete coverage over the domain
@@ -177,24 +183,4 @@ getArea = function(x) {
 		return(getAreaSP(x))
 	# lines, points:
 	return(0.0)
-}
-#' plot method for SpatialField objects
-#' 
-#' plot method for SpatialField objects
-#' 
-#' @usage plot(x, ..., bg = grey(0.7))
-#' @param x object of class \link{SpatialField}
-#' @param bg background colour for domain
-#' @export
-#' @examples
-#' library(sp)
-#' demo(meuse, ask = FALSE, echo = FALSE)
-#' plot(SpatialField(meuse, meuse.grid))
-#' plot(SpatialField(meuse, meuse.area))
-plot.SpatialField = function(x,..., bg = grey(0.7)) {
-	if (gridded(x@domain@area))
-		image(x@domain@area, col = bg)
-	else
-		plot(x@domain@area, col = bg)
-	plot(x@observations, add = TRUE, ...)
 }

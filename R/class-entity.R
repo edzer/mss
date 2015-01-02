@@ -22,7 +22,7 @@
 
 #' @name SpatialEntities-class
 #' @rdname SpatialEntities-class
-#' @aliases SpatialEntities-class
+#' @aliases SpatialEntities-class [,SpatialEntities-method [[,SpatialEntities,ANY,missing-method [[<-,SpatialEntities,ANY,missing-method
 #' @exportClass SpatialEntities
 #' @author Edzer Pebesma
 #' @seealso \link{SpatialField}

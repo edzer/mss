@@ -8,10 +8,10 @@ Authors@R: c(person("Edzer", "Pebesma", role = c("cre", "aut"),
     person("Christoph", "Stasch", role = "ctb"))
 Depends: methods
 Imports: sp (>= 1.0-17)
-Suggests: rgeos, gstat (>= 1.0-20), MASS, knitr
+Suggests: rgeos, gstat (>= 1.0-20), maptools, MASS, knitr
 LazyData: yes
 License: GPL-2 | file LICENSE
 URL: http://github.com/edzer/mss
 VignetteBuilder: knitr
 Collate: mss.R class-window.R class-entity.R class-field.R class-aggregation.R 
-	field-methods.R entities-methods.R aggregate.R
+	field-methods.R entities-methods.R aggregate.R plot.R

@@ -3,8 +3,8 @@
 .mssOptions <- new.env(FALSE, globalenv())
 assign("mss_error", FALSE, envir = .mssOptions)
 
-#' @import methods
 #' @importFrom stats aggregate density
+#' @import methods
 #' @import sp 
 NULL
 
@@ -50,7 +50,8 @@ area_extends_window = function(o, w) {
 				mss("for comparing aggregation areas/domain/window, package rgeos required")
 				return(FALSE) # can't tell!
 			}
-			diff = rgeos::gDifference(gUnionCascaded(o), gUnionCascaded(w@area))
+			diff = rgeos::gDifference(rgeos::gUnionCascaded(o), 
+				rgeos::gUnionCascaded(w@area))
 			return(!is.null(diff) && getArea(diff) > sqrt(.Machine$double.eps))
 		}
 		# if o is SpatialLines, do here something better;
