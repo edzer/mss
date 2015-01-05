@@ -1,6 +1,7 @@
 <!--
 %\VignetteEngine{knitr::knitr}
 %\VignetteIndexEntry{Spatial and spatio-temporal objects in Google charts}
+\usepackage[utf8]{inputenc}
 -->
 
 # Meaningful Spatial Statistics: The `mss` R Package

@@ -28,7 +28,7 @@ is.sum = function(x) {
 aggregate.SpatialField = function(x, by, FUN = mean, ...) {
 	if (!is(by, "SpatialAggregation"))
 		stop("argument `by' needs to be of class `SpatialAggregation'")
-	if (area_extends_window(by@observations, x@domain))
+	if (isTRUE(obs_extends_window(by@observations, x@domain)))
 		not_meaningful("aggregation over an area larger than the domain")
 	if (is.sum(FUN))
 		not_meaningful("for SpatialField objects, aggregation using a sum function")
@@ -39,7 +39,7 @@ aggregate.SpatialField = function(x, by, FUN = mean, ...) {
 aggregate.SpatialEntities = function(x, by, FUN = mean, ...) {
 	if (!is(by, "SpatialAggregation"))
 		stop("argument `by' needs to be of class `SpatialAggregation'")
-	if (area_extends_window(by@observations, x@window))
+	if (isTRUE(obs_extends_window(by@observations, x@window)))
 		not_meaningful("aggregation over an area larger than the observation window")
 	if (!is.sum(FUN))
 		maybe_meaningful("aggregation using a non-sum function")

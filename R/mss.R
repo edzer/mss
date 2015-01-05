@@ -39,24 +39,24 @@ not_meaningful = function(x) mss(x, "is not considered meaningful")
 
 maybe_meaningful = function(x) mss(x, "may not be meaningful")
 
-area_extends_window = function(o, w) {
-	#if (gridded(w@area))
-	#	w@area = as(w@area, "SpatialPolygons")
+obs_extends_window = function(o, w, convert = FALSE) {
+	if (convert && gridded(w@area))
+		w@area = as(w@area, "SpatialPolygons")
 	if (is(w@area, "SpatialPolygons")) {
-		#if (gridded(o))
-		#	o = as(o, "SpatialPolygons")
+		if (convert && gridded(o))
+			o = as(o, "SpatialPolygons")
 		if (is(o, "SpatialPolygons")) {
 			if (!requireNamespace("rgeos", quietly = TRUE)) {
 				mss("for comparing aggregation areas/domain/window, package rgeos required")
-				return(FALSE) # can't tell!
+				return(NA) # can't tell!
 			}
-			diff = rgeos::gDifference(rgeos::gUnionCascaded(o), 
-				rgeos::gUnionCascaded(w@area))
-			return(!is.null(diff) && getArea(diff) > sqrt(.Machine$double.eps))
+			o = rgeos::gUnaryUnion(o)
+			w = rgeos::gUnaryUnion(w@area)
+			return(! rgeos::gWithin(o, w))
 		}
 		# if o is SpatialLines, do here something better;
 		# for SpatialPoints:
 		return(any(is.na(over(o, w@area))))
 	}
-	FALSE
+	NA
 }

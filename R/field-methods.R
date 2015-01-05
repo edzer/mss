@@ -26,8 +26,6 @@ setMethod("interpolate", c("formula", "SpatialField", "SpatialField"),
 	function(formula, data, newdata, ...) {
 		if (any(is.na(over(newdata@observations, data@domain@area))))
 			not_meaningful("interpolation outside the observation domain")
-		#if (area_extends_window(newdata@domain@area, data@domain))
-		#	not_meaningful("interpolating over an area larger than the domain")
 		if (full.coverage(data)) {
 			stopifnot(is(newdata@observations, "SpatialPoints"))
 			SpatialField(addAttrToGeom(newdata@observations, 
@@ -60,7 +58,7 @@ setMethod("interpolate", c("formula", "SpatialField", "SpatialAggregation"),
 			not_meaningful("interpolation outside the data domain")
 		if (!requireNamespace("gstat", quietly = TRUE))
 			stop("package gstat required")
-		if (area_extends_window(newdata@observations, data@domain))
+		if (isTRUE(obs_extends_window(newdata@observations, data@domain)))
 			not_meaningful("interpolating over an area larger than the domain")
 		if (gridded(newdata@observations)) {
 			block = gridparameters(newdata@observations)$cellsize
@@ -76,7 +74,8 @@ setMethod("interpolate", c("formula", "SpatialAggregation", "SpatialField"),
 	function(formula, data, newdata, ...) {
 		if (!requireNamespace("gstat", quietly = TRUE))
 			stop("package gstat required")
-		if (area_extends_window(newdata@observations, Window(data@observations)))
+		if (isTRUE(obs_extends_window(newdata@observations, 
+				Window(data@observations))))
 			not_meaningful("interpolating over an area larger than the domain")
 		var1.pred = gstat::krige0(formula, data@observations, newdata@observations,
 			gstat::vgm_area, ...)
@@ -90,7 +89,8 @@ setMethod("interpolate", c("formula", "SpatialAggregation", "SpatialAggregation"
 	function(formula, data, newdata, ...) {
 		if (!requireNamespace("gstat", quietly = TRUE))
 			stop("package gstat required")
-		if (area_extends_window(newdata@observations, Window(data@observations)))
+		if (isTRUE(obs_extends_window(newdata@observations, 
+				Window(data@observations))))
 			not_meaningful("interpolating over an area larger than the domain")
 		var1.pred = gstat::krige0(formula, data@observations, newdata@observations,
 			gstat::vgm_area, ...)
