@@ -55,3 +55,4 @@ setClass("SpatialAggregation", slots = c(observations = "Spatial"),
 SpatialAggregation = function(observations) {
 	new("SpatialAggregation", observations = observations)
 }
+setAs("SpatialAggregation", "data.frame", function(from) as(from@observations, "data.frame"))

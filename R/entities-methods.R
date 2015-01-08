@@ -49,3 +49,4 @@ setMethod("interpolate", c("formula", "SpatialEntities", "ANY"),
 )
 setMethod("[[", c("SpatialEntities", "ANY", "missing"), double_bracket)
 setReplaceMethod("[[", c("SpatialEntities", "ANY", "missing", "ANY"), double_bracket_repl)
+setAs("SpatialEntities", "data.frame", function(from) as(from@observations, "data.frame"))

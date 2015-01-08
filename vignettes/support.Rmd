@@ -87,29 +87,89 @@ polygon with a constant value:
 pol = addAttrToGeom(meuse.area, data.frame(value = 3), FALSE)
 sf.pol = SpatialField(pol, meuse.area)
 ```
-
+## `SpatialEntities`: point patterns or objects
+The `SpatialEntities` class can be used to represent objects in a space,
+where the _window of observation_ reflects the area for which all
+points or objects are available:
 ```{r}
 showClass("SpatialEntities")
 ```
+We can create a point pattern e.g. for the sample locations of the `meuse`
+data set:
+```{r}
+pts = geometry(meuse)
+se.pts = SpatialEntities(pts, meuse.area)
+```
+but also areas can indicate entities:
+```{r}
+se.area = SpatialEntities(meuse.area, meuse.area)
+```
 
+## `SpatialAggregation`: areal data
+Aggregations refer to values, measured or computed as the aggregate
+over a set of (point) values, e.g. the mean, maximum or minimum value.
+As such, aggregations need to be defined for _sets of points_, i.e.
+for lines, polygons, or grid cells:
 ```{r}
 showClass("SpatialAggregation")
 ```
+_Sets of points_ can be represented by anything but points: lines, grids,
+and polygons:
+```{r}
+sa.1 = SpatialAggregation(cl)
+sa.3 = SpatialAggregation(meuse.grid)
+sa.2 = SpatialAggregation(pol)
+```
 
-## Interpolation
+## Three interpretations of a spatial grid
+Spatial grid data can be conceived as having values for
+1. points, at grid cell centres
+2. constant values throughout each grid cell
+3. aggregated values over the grid cell region
+The difference is illustrated by querying each at two points, one
+coinciding with a grid cell centre, one not coinciding. The two
+points are indicated by red circles:
+```{r}
+xy = rbind(coordinates(meuse)[1,], coordinates(meuse.grid)[10,])
+pts = SpatialPoints(xy, CRS(proj4string(meuse.grid)))
+plot(as(meuse.grid[1:21,], "SpatialPolygons"))
+plot(pts, col = 'red', pch = 16, add = TRUE)
+plot(meuse.grid[1:21,], add = TRUE)
+text(coordinates(pts), c("1", "2"), pos = 2)
+```
+Querying a spatial field where cells are points gives:
+```{r}
+f1 = SpatialField(meuse.grid, meuse.area, cellsArePoints = TRUE)
+pts = SpatialField(pts, meuse.grid)
+over(pts, f1)
+```
+
+Querying a spatial field where cells are constant valued areas gives:
+```{r}
+f2 = SpatialField(meuse.grid, meuse.area, cellsArePoints = FALSE)
+over(pts, f2) # matches pts to the complete grid cell
+```
+Querying a grid where cell values are aggregations does not answer and
+generates a warning:
+```{r}
+a = SpatialAggregation(meuse.grid)
+over(pts, a)
+```
+
+## Methods for fields: interpolation
 
 ### interpolation of point support data
 We can predict to points, laid out regularly, inside a polygon
 ```{r}
-m = SpatialField(meuse, meuse.area) # data are point support
-i1 = interpolate(log(zinc)~1, m) # interpolate from point TO point support
+m = SpatialField(meuse, meuse.area)
+i1 = interpolate(log(zinc)~1, m)
 spplot(i1, "var1.pred")
 ```
+
 To show that these really concern points, plotting for a smaller region gives
 actual point symbols:
 ```{r}
-spplot(i1, "var1.pred", xlim = c(179440,180560), ylim = c(330000,331000))
-
+spplot(i1[1:300,], "var1.pred")
 ```
 
 or we can predict the polygon area mean value:
@@ -125,7 +185,8 @@ We can repeat this with a domain, defined by the `meuse.grid` object, by
 predicting to point support values for points on a grid
 ```{r}
 m = SpatialField(meuse, meuse.grid)
-i3 = interpolate(log(zinc)~1, m)
+v = vgm(1, "Exp", 1) # variogram model
+i3 = interpolate(log(zinc)~1, m, model = v)
 print(as(i3[1:3,], "data.frame"), digits = 10) # point support
 ```
 or predict values for cell means:
@@ -243,13 +304,13 @@ Prediction on a field variable generates no warning.**
 Where prediction of a `SpatialField` varialbe generates no warning,
 ```{r}
 m = SpatialField(meuse, meuse.area) # data are point support
-i1 = interpolate(log(zinc)~1, m) # interpolate from point TO point support
+res = interpolate(log(zinc)~1, m) # interpolate from point TO point support
 ```
 prediction of a point pattern variable generates a warning:
 ```{r}
 m = SpatialEntities(meuse, meuse.area)
 sa = SpatialAggregation(meuse.grid)
-i1 = interpolate(log(zinc)~1, m, sa) # interpolate point pattern variable: warns
+res = interpolate(log(zinc)~1, m, sa) # interpolate point pattern variable: warns
 ```
 ## A2. 
 **Summing up values over an area is meaningful, if the observed window corresponds to the target geometry (grouping predicate) of the aggregation.**
@@ -274,7 +335,7 @@ Further assertions in the poster:
 (population density), this matters for (further) aggregation or downsampling.**
 
 Package `mss` distinguishes between `SpatialField` and
-`SpatialAggregations` to represent constant values, and aggregations,
+`SpatialAggregation` to represent constant values, and aggregations,
 respectively. Subsampling `SpatialField` variabls does not not warn,
 ```{r}
 area = addAttrToGeom(meuse.area, data.frame(v=1), match.ID = FALSE)
