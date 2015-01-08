@@ -1,51 +1,98 @@
 <!--
 %\VignetteEngine{knitr::knitr}
-%\VignetteIndexEntry{Spatial and spatio-temporal objects in Google charts}
+%\VignetteIndexEntry{Meaningful Spatial Statistics: an introduction}
 \usepackage[utf8]{inputenc}
 -->
+# Meaningful Spatial Statistics: The `mss` Package
 
-# Meaningful Spatial Statistics: The `mss` R Package
-
+This vignette introduces an R package for meaningful spatial statistics,
 ```{r}
-library(mss) # meaningful spatial statistics
+library(mss)
 ```
 
-## Support, Domain, and Observation Window
-This document introduces three classes for spatial data:
-`SpatialField` and `SpatialEntities`, for representing spatial
-fields, and entities, respectively, and `SpatialAggregation` for
-spatial aggregations over fields and/or entities. 
+The package introduces three classes for spatial data: `SpatialField`
+for representing geostatistical data, `SpatialEntities` for
+point patterns, and `SpatialAggregation` for lattice (areal)
+data. 
 
-# Domain and observation windows
-The window class defines an area, either represented by a grid or by a polygon:
+## `Window`: field domain or observation windows
+`SpatialField` and `SpatialEntities` contain a `Window`,
+representing the domain of the field, or the window of observation
+for a point pattern.  
+
+The window class defines an area: 
 ```{r}
 showClass("Window")
 ```
-and it is used to define a domain for a `SpatialField` object, or the
-observation window for a `SpatialEntities` object.
-
-After loading `sp`, we can import several objects
-related to the `meuse` data set:
+The area can be represented either by a grid, as in
 ```{r}
 library(sp)
 demo(meuse, ask = FALSE, echo = FALSE)
-sapply(ls(), function(x) class(get(x)))
+w2 = Window(meuse.grid) # note the grid is passed, not the polygons
 ```
-we can define a window for the observation points data 
-set by the `meuse.grid` data,
+or by a polygon or set of polygons, as in
 ```{r}
-w2 = Window(area = meuse.grid) # note the grid is passed, not the polygons
-```
-or by using the area as single polygon:
-```{r}
-w1 = Window(area = meuse.area)
+w1 = Window(meuse.area)
 ```
 
-We define spatial data objects as either fields having an observation
-domain, entities having an observation window, or aggregations:
+## `SpatialField`: geostatistical data
+SpatialFields represent _continuous_ functions, which over a
+domain $D$ have a value at every _point_ $s \in D$.
 ```{r}
 showClass("SpatialField")
+```
+### Fields from points
+Observations on fields variables are often done on irregular
+point locations. Such a field variable is created from a
+`SpatialPointsDataFrame` object:
+```{r}
+sf = SpatialField(meuse, meuse.grid)
+```
+where, here, `meuse.grid` defines the domain for the
+field. Alternatively, _point observations_ can be gridded, and
+defined as a field by
+```{r}
+sf = SpatialField(meuse.grid, meuse.grid, cellsArePoints = TRUE)
+```
+Note that the first argument defines the point observations, and 
+the second argument the domain: the first argument is treated as
+a (gridded) set of points (grid cell centres), the second as a 
+gridded set of areas (cells).
+### Fields from grids, grid cells representing constant areas
+We can alternatively assume that each grid cell represents an area
+with constant point values. Such a field is defined by:
+```{r}
+sf = SpatialField(meuse.grid, meuse.grid, cellsArePoints = FALSE)
+```
+This field is completely known, for every point location. Note
+that grid cell values are _constant throughout the cell_, and are
+not conceived as cell aggregate (e.g. average, or otherwise
+convoluted) values. For that case, `SpatialAggregates` are used.
+
+### Fields from lines and polygons
+Sets of points can not only be defined by grid cells, but also
+through lines, or polygons. For instance, points on a contour
+line could form a sample of a field:
+```{r}
+library(maptools)
+library(rgeos)
+cl = ContourLines2SLDF(contourLines(as.image.SpatialGridDataFrame(
+  meuse.grid["dist"])))
+proj4string(cl) = CRS(proj4string(meuse.grid))
+sf.lines = SpatialField(cl, meuse.grid)
+```
+or, alternatively, as a set of polygons; in this example, a single
+polygon with a constant value:
+```{r}
+pol = addAttrToGeom(meuse.area, data.frame(value = 3), FALSE)
+sf.pol = SpatialField(pol, meuse.area)
+```
+
+```{r}
 showClass("SpatialEntities")
+```
+
+```{r}
 showClass("SpatialAggregation")
 ```
 
@@ -57,6 +104,12 @@ We can predict to points, laid out regularly, inside a polygon
 m = SpatialField(meuse, meuse.area) # data are point support
 i1 = interpolate(log(zinc)~1, m) # interpolate from point TO point support
 spplot(i1, "var1.pred")
+```
+To show that these really concern points, plotting for a smaller region gives
+actual point symbols:
+```{r}
+spplot(i1, "var1.pred", xlim = c(179440,180560), ylim = c(330000,331000))
+
 ```
 
 or we can predict the polygon area mean value:
@@ -110,7 +163,7 @@ The second case, grid cells represent constant area with
 point support value, meaning that every point location within
 a grid cell has the value of the grid cell assigned:
 ```{r}
-sf = SpatialField(sgdf, sgdf)
+sf = SpatialField(sgdf, sgdf, cellsArePoints = TRUE)
 i6 = interpolate(r~1, sf, SpatialField(pt.red, sgdf))
 as(i6[1,], "data.frame")
 ```
@@ -130,7 +183,7 @@ library(gstat)
 kr = interpolate(r~1, gf, SpatialField(pt.red, sp), 
 	vgm = vgm(1, "Exp", 5, 0))
 kr@observations[[1]]
-krige0(r ~ 1, sp, pt.red, vgm_area, vgm = vgm(1, "Exp", 5, 0))
+krige0(r ~ 1, sp, pt.red, vgmArea, vgm = vgm(1, "Exp", 5, 0))
 ```
 
 ### Grid-to-grid kriging
@@ -144,7 +197,7 @@ plot(grd, add = TRUE, border = 'red')
 kr = interpolate(r~1, gf, SpatialAggregation(grd), 
 	vgm = vgm(1, "Exp", 5, 0))
 kr@observations[[1]]
-krige0(r ~ 1, sp, grd, vgm_area, vgm = vgm(1, "Exp", 5, 0))
+krige0(r ~ 1, sp, grd, vgmArea, vgm = vgm(1, "Exp", 5, 0))
 ```
 
 ## Estimating density from entitities
@@ -217,7 +270,8 @@ prove A1 and A2 more formally.
 
 Further assertions in the poster:
 ## A3.
-**Polygon data may reflect constant values over areas (geology) or means (population density), this matters for (further) aggregation or downsampling.**
+**Polygon data may reflect constant values over areas (geology) or means 
+(population density), this matters for (further) aggregation or downsampling.**
 
 Package `mss` distinguishes between `SpatialField` and
 `SpatialAggregations` to represent constant values, and aggregations,
@@ -225,25 +279,29 @@ respectively. Subsampling `SpatialField` variabls does not not warn,
 ```{r}
 area = addAttrToGeom(meuse.area, data.frame(v=1), match.ID = FALSE)
 f = SpatialField(area, meuse.area)
-pts = SpatialField(meuse, meuse.area)
-x1 = over(pts, f)
+pts = SpatialField(meuse[1:5,], meuse.area)
+over(pts, f) # retrieve f at the points of pts:
 ```
-but subsampling `SpatialAggregation` variables triggers a warning:
+but subsampling `SpatialAggregation` variables triggers a warning, and no
+useful value
 ```{r}
 a = SpatialAggregation(area)
-x2 = over(pts, a)
+over(pts, a)
 ```
+as it should really disaggregate first, from area to point.
 
 ## A4.
 **The same is true for grid cells.**
 
-`SpatialField` and `SpatialAggregation` both generalize polygon and grid data:
+`SpatialField` and `SpatialAggregation` both generalize polygon and grid data.
 ```{r}
-f = SpatialField(meuse.grid, meuse.area)
-pts = SpatialField(meuse, meuse.area)
+f1 = SpatialField(meuse.grid, meuse.area, cellsArePoints = TRUE)
+pts = SpatialField(meuse[1:5,], meuse.area)
+over(pts, f1) # matches pts to grid cell center points:
+f2 = SpatialField(meuse.grid, meuse.area, cellsArePoints = FALSE)
+over(pts, f2) # matches pts to the complete grid cell
 a = SpatialAggregation(meuse.grid)
-x1 = over(pts, f)
-x2 = over(pts, a)
+over(pts, a)
 ```
 
 ## A5. 

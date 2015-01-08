@@ -30,12 +30,12 @@ setMethod("interpolate", c("formula", "SpatialField", "SpatialField"),
 			stopifnot(is(newdata@observations, "SpatialPoints"))
 			SpatialField(addAttrToGeom(newdata@observations, 
 					over(newdata@observations, data@observations), TRUE), 
-				data@domain)
+				data@domain, cellsArePoints = TRUE)
 		} else { # point kriging
 			if (!requireNamespace("gstat", quietly = TRUE))
 				stop("package gstat required")
 			SpatialField(gstat::krige(formula, data@observations, 
-				newdata@observations, ...), data@domain)
+				newdata@observations, ...), data@domain, cellsArePoints = TRUE)
 		}
 	}
 )
@@ -48,7 +48,7 @@ setMethod("interpolate", c("formula", "SpatialField", "missing"),
 			newdata = spsample(newdata, ncells, "regular")
 			gridded(newdata) = TRUE
 		}
-		interpolate(formula, data, SpatialField(newdata), ...)
+		interpolate(formula, data, SpatialField(newdata, newdata, cellsArePoints = TRUE), ...)
 })
 #' @rdname interpolate
 #' @export
@@ -78,7 +78,7 @@ setMethod("interpolate", c("formula", "SpatialAggregation", "SpatialField"),
 				Window(data@observations))))
 			not_meaningful("interpolating over an area larger than the domain")
 		var1.pred = gstat::krige0(formula, data@observations, newdata@observations,
-			gstat::vgm_area, ...)
+			gstat::vgmArea, ...)
 		nd = addAttrToGeom(newdata@observations, data.frame(var1.pred), FALSE)
 		SpatialField(nd, domain = newdata@domain)
 	}
@@ -93,15 +93,26 @@ setMethod("interpolate", c("formula", "SpatialAggregation", "SpatialAggregation"
 				Window(data@observations))))
 			not_meaningful("interpolating over an area larger than the domain")
 		var1.pred = gstat::krige0(formula, data@observations, newdata@observations,
-			gstat::vgm_area, ...)
+			gstat::vgmArea, ...)
 		newdata = addAttrToGeom(newdata@observations, data.frame(var1.pred), FALSE)
 		SpatialAggregation(newdata)
 	}
 )
-setMethod("spplot", "SpatialField", function(obj,...) spplot(obj@observations, ...))
+setMethod("spplot", "SpatialField", 
+	function(obj,..., cellsAsPoints = 3000, colorkey = TRUE) {
+		obs = obj@observations
+		if (gridded(obs) && prod(gridparameters(obs)$cells.dim[1:2]) < cellsAsPoints)
+			gridded(obs) = FALSE
+		spplot(obs, ..., colorkey = colorkey)
+	}
+)
 setMethod("over", c("SpatialField", "SpatialField"), 
-	function(x, y, returnList = FALSE, fn = NULL, ...) 
-		over(x@observations,y@observations, returnList, fn, ...))
+	function(x, y, returnList = FALSE, fn = NULL, ...) {
+		if (gridded(y@observations) && y@cellsArePoints)
+			gridded(y@observations) = FALSE  # converts to Points
+		over(x@observations, y@observations, returnList, fn, ...)
+	}
+)
 setMethod("over", c("SpatialField", "SpatialAggregation"), 
 	function(x, y, returnList = FALSE, fn = NULL, ...) {
 		not_meaningful("deriving field values from aggregations")
@@ -144,9 +155,9 @@ setMethod("[[", c("SpatialAggregation", "ANY", "missing"), double_bracket)
 #' @export
 full.coverage = function(x) {
 	stopifnot(is(x, "SpatialField"))
-	if (x@observations_equal_domain)
+	if (x@observationsEqualDomain)
 		return(TRUE)
-	(gridded(x@domain@area) || is(x@domain@area, "SpatialPolygons")) &&
+	((gridded(x@domain@area) && ! x@cellsArePoints) || is(x@domain@area, "SpatialPolygons")) &&
 		isTRUE(all.equal(getArea(x@observations), 
 			getArea(x@domain@area))) # allows for numerical fuzz
 }

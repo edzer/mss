@@ -22,7 +22,8 @@
 #'  \describe{
 #'    \item{\code{observations}:}{object of a subclass of \link[sp]{Spatial}}
 #'    \item{\code{domain}:}{object of class \link{Window}}
-#'    \item{\code{observations_equal_domain}:}{logical; are the \code{observations} identical to the \code{domain}?}
+#'    \item{\code{observationsEqualDomain}:}{logical; are the \code{observations} identical to the \code{domain}?}
+#'    \item{\code{cellsArePoints}}{logical; do grid cell values reflect point values at the grid cell centre (TRUE) or constant point values throughout the whole grid cell (FALSE)?}
 #'  }
 #'
 #' @usage SpatialField(...)
@@ -50,7 +51,7 @@
 
 SpatialField = setClass("SpatialField",
 	slots = c(observations = "Spatial", domain = "Window", 
-		observations_equal_domain = "logical"))
+		observationsEqualDomain = "logical", cellsArePoints = "logical"))
 
 ##############################################################
 #' SpatialField initialize function
@@ -68,23 +69,30 @@ SpatialField = setClass("SpatialField",
 #' @export
 #' @docType methods
 #' @rdname initialize-SpatialField-methods
-setMethod("initialize", "SpatialField", function(.Object, observations, domain) {
-	.Object <- callNextMethod()
-	# stopifnot("data" %in% slotNames(sp)) # need attribute values
-	if (missing(domain)) {
-		domain = Window(observations)
-		.Object@observations_equal_domain = TRUE
-		mss("domain was set to the observations' geometry")
-	} else {
-		.Object@observations_equal_domain = FALSE
-		if (is(domain, "Spatial"))
-			domain = Window(domain)
-		else stopifnot(is(domain, "Window"))
-#		check all features are inside domain here?
-		if (any(is.na(over(observations, domain@area))))
-			not_meaningful("having observations outside the domain")
+setMethod("initialize", "SpatialField", 
+	function(.Object, observations, domain, cellsArePoints = NA) {
+		.Object <- callNextMethod()
+		if (missing(domain)) {
+			domain = Window(observations)
+			.Object@observationsEqualDomain = TRUE
+			mss("setting domain to the observations' geometry")
+		} else {
+			.Object@observationsEqualDomain = FALSE
+			if (is(domain, "Spatial"))
+				domain = Window(domain)
+			else 
+				stopifnot(is(domain, "Window"))
+	#		check all features are inside domain here?
+			if (any(is.na(over(observations, domain@area))))
+				not_meaningful("having observations outside the domain")
+		}
+		#if (! ("data" %in% slotNames(observations))) # need attribute values
+		#	stop("Spatial* object needs to have attributes")
+		if (gridded(observations) && is.na(cellsArePoints))
+			stop("for gridded observations, cellsArePoints needs to be specified")
+		.Object@cellsArePoints = cellsArePoints
+		.Object@observations = observations
+		.Object@domain = domain
+		.Object
 	}
-	.Object@observations = observations
-	.Object@domain = domain
-	.Object
-})
+)

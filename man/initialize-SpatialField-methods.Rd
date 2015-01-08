@@ -5,7 +5,8 @@
 \alias{initialize,SpatialField-method}
 \title{SpatialField initialize function}
 \usage{
-\S4method{initialize}{SpatialField}(.Object, observations, domain)
+\S4method{initialize}{SpatialField}(.Object, observations, domain,
+  cellsArePoints = NA)
 }
 \arguments{
 \item{.Object}{(ignore)}

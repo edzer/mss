@@ -37,7 +37,7 @@ density.SpatialEntities = function(x, bandwidth, newdata, ncells = 5000, ...) {
 	a = addAttrToGeom(n, data.frame(density = as.vector(k$z[,ncol(k$z):1,drop=FALSE])))
 	a = a[newdata,]
 	fullgrid(a) = fullgrid(newdata) # if wanted, coerce to SpatialPixelsDataFrame
-	SpatialField(a, newdata)
+	SpatialField(a, newdata, cellsArePoints = TRUE)
 }
 #' @rdname interpolate
 #' @export
