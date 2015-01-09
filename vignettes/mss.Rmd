@@ -13,7 +13,7 @@ library(mss)
 The package introduces three classes for spatial data: `SpatialField`
 for representing geostatistical data, `SpatialEntities` for
 point patterns, and `SpatialAggregation` for lattice (areal)
-data. 
+data.
 
 ## `Window`: field domain or observation windows
 `SpatialField` and `SpatialEntities` contain a `Window`,
@@ -158,11 +158,12 @@ over(pts, a)
 
 ## Methods for fields: interpolation
 
-### interpolation of point support data
-We can predict to points, laid out regularly, inside a polygon
+### point-to-point interpolation
+We can predict to points, laid out regularly, inside the polygon of the field domain:
 ```{r}
 m = SpatialField(meuse, meuse.area)
-i1 = interpolate(log(zinc)~1, m)
+v = gstat::vgm(.6, "Sph", 900, .05) # variogram model
+i1 = interpolate(log(zinc)~1, m, model = v)
 spplot(i1, "var1.pred")
 ```
 
@@ -172,34 +173,34 @@ actual point symbols:
 spplot(i1[1:300,], "var1.pred")
 ```
 
-or we can predict the polygon area mean value:
+Alternatively, we can predict values on a pre-defined grid, taken
+from the domain:
+```{r}
+m = SpatialField(meuse, meuse.grid)
+i2 = interpolate(log(zinc)~1, m, model = v)
+print(as(i2[1:3,], "data.frame"), digits = 10) # point support
+```
+
+### point-to-area interpolation (block kriging)
+From point values, we can predict the polygon area mean value:
 ```{r}
 library(rgeos)
-m2 = SpatialAggregation(meuse.area)
-i2 = interpolate(log(zinc)~1, m, m2) # interpolate from point TO polygon support
-i2$var1.pred # a single value, estimate of mean for the whole area
+m3 = SpatialAggregation(meuse.area)
+i3 = interpolate(log(zinc)~1, m, m3, model = v) # interpolate from point TO polygon support
+i3$var1.pred # a single value, estimate of mean for the whole area
 mean(log(m$zinc)) # sample mean
 mean(i1$var1.pred) # mean of predictions, similar to i2$var1.pred
 ```
-We can repeat this with a domain, defined by the `meuse.grid` object, by
-predicting to point support values for points on a grid
-```{r}
-m = SpatialField(meuse, meuse.grid)
-v = vgm(1, "Exp", 1) # variogram model
-i3 = interpolate(log(zinc)~1, m, model = v)
-print(as(i3[1:3,], "data.frame"), digits = 10) # point support
-```
-or predict values for cell means:
+or predict values for grid cell averages (block kriging):
 ```{r}
 m4 = SpatialAggregation(meuse.grid)
-i4 = interpolate(log(zinc)~1, m, m4) # interpolate from point TO feature (cell) support
+i4 = interpolate(log(zinc)~1, m, m4, model = v) # interpolate from point TO feature (cell) support
 print(as(i4[1:3,], "data.frame"), digits = 10) # grid cells support
 spplot(i4, "var1.pred")
 ```
 
-### Support of the feature
-Suppose we have grid data on a 3 x 3 grid, and
-want to estimate on a new location, indicated by a red
+### Support: area-to-point and area-to-area kriging
+Suppose we have grid data on a 3 x 3 grid, and want to estimate on a new location, indicated by a red
 circle:
 ```{r}
 set.seed(131)
@@ -217,22 +218,24 @@ point support values at the grid cell centre, which
 is identical to case `i1` above:
 ```{r}
 sf = SpatialField(as(sgdf, "SpatialPointsDataFrame"), sgdf)
-i5 = interpolate(r~1, sf, SpatialField(pt.red, sgdf))
+vm = gstat::vgm(1, "Exp", 1)
+i5 = interpolate(r~1, sf, SpatialField(pt.red, sgdf), model = vm)
 as(i5[1,], "data.frame")
 ```
 The second case, grid cells represent constant area with
 point support value, meaning that every point location within
 a grid cell has the value of the grid cell assigned:
 ```{r}
-sf = SpatialField(sgdf, sgdf, cellsArePoints = TRUE)
-i6 = interpolate(r~1, sf, SpatialField(pt.red, sgdf))
-as(i6[1,], "data.frame")
+sf = SpatialField(sgdf, sgdf, cellsArePoints = FALSE)
+i6 = interpolate(r~1, sf, SpatialField(pt.red, sgdf), model = vm)
+as(i6[1,], "data.frame") # does not interpolate, but queries grid cell
 ```
-as case (...) above, we can predict a mean value for a grid cell by
+as case `i4` above, from point values we can predict a mean value for a grid cell by
 ```{r}
+sf = SpatialField(sgdf, sgdf, cellsArePoints = TRUE)
 gt = GridTopology(cellcentre.offset = c(.25,.25), cellsize = c(1,1), cells.dim = c(1,1))
 grd.red = SpatialGrid(gt)
-i7 = interpolate(r~1, sf, SpatialAggregation(grd.red))
+i7 = interpolate(r~1, sf, SpatialAggregation(grd.red), model = vm)
 i7@observations@data
 ```
 
@@ -240,14 +243,13 @@ i7@observations@data
 ```{r}
 sp = as(sgdf, "SpatialPolygonsDataFrame")
 gf = SpatialAggregation(sp)
-library(gstat)
-kr = interpolate(r~1, gf, SpatialField(pt.red, sp), 
-	vgm = vgm(1, "Exp", 5, 0))
+kr = interpolate(r~1, gf, SpatialField(pt.red, sp), model = vm)
 kr@observations[[1]]
-krige0(r ~ 1, sp, pt.red, vgmArea, vgm = vgm(1, "Exp", 5, 0))
+library(gstat)
+krige0(r ~ 1, sp, pt.red, vgmArea, vgm = vm) # check
 ```
 
-### Grid-to-grid kriging
+### Area-to-area (grid-to-grid) kriging
 ```{r}
 sp = as(sgdf, "SpatialPolygonsDataFrame")
 gr = as(grd.red, "SpatialPolygons")
@@ -255,10 +257,9 @@ grd = addAttrToGeom(gr, data.frame(r=0), FALSE)
 plot(as(sgdf, "SpatialPolygons"), axes = TRUE)
 text(coordinates(sgdf), labels = sgdf[[1]])
 plot(grd, add = TRUE, border = 'red')
-kr = interpolate(r~1, gf, SpatialAggregation(grd), 
-	vgm = vgm(1, "Exp", 5, 0))
+kr = interpolate(r~1, gf, SpatialAggregation(grd), model = vm)
 kr@observations[[1]]
-krige0(r ~ 1, sp, grd, vgmArea, vgm = vgm(1, "Exp", 5, 0))
+krige0(r ~ 1, sp, grd, vgmArea, vgm = vm) # check
 ```
 
 ## Estimating density from entitities
@@ -269,8 +270,15 @@ e = SpatialEntities(meuse, meuse.area)
 d = density(e, newdata = meuse.grid)
 lt = list(list("sp.polygons", meuse.area, border = 'black',
 	first=FALSE), list("sp.points", meuse, col = grey(.5), pch = 16))
+class(d)
 spplot(d, sp.layout = lt)
 ```
+
+The reason why this returns a `SpatialAggregation` is that the
+values computed (densities) do not correspond to quantities that are
+measurable at point locations where they are registered (grid cells).
+In fact, they are aggregated values for areas even much larger than
+the grid cells.
 
 ## Spatial Aggregation
 

@@ -71,14 +71,14 @@ setMethod("interpolate", c("formula", "SpatialField", "SpatialAggregation"),
 #' @rdname interpolate
 #' @export
 setMethod("interpolate", c("formula", "SpatialAggregation", "SpatialField"),
-	function(formula, data, newdata, ...) {
+	function(formula, data, newdata, model, ...) {
 		if (!requireNamespace("gstat", quietly = TRUE))
 			stop("package gstat required")
 		if (isTRUE(obs_extends_window(newdata@observations, 
 				Window(data@observations))))
 			not_meaningful("interpolating over an area larger than the domain")
 		var1.pred = gstat::krige0(formula, data@observations, newdata@observations,
-			gstat::vgmArea, ...)
+			gstat::vgmArea, vgm = model, ...)
 		nd = addAttrToGeom(newdata@observations, data.frame(var1.pred), FALSE)
 		SpatialField(nd, domain = newdata@domain)
 	}
@@ -86,14 +86,14 @@ setMethod("interpolate", c("formula", "SpatialAggregation", "SpatialField"),
 #' @rdname interpolate
 #' @export
 setMethod("interpolate", c("formula", "SpatialAggregation", "SpatialAggregation"),
-	function(formula, data, newdata, ...) {
+	function(formula, data, newdata, model, ...) {
 		if (!requireNamespace("gstat", quietly = TRUE))
 			stop("package gstat required")
 		if (isTRUE(obs_extends_window(newdata@observations, 
 				Window(data@observations))))
 			not_meaningful("interpolating over an area larger than the domain")
 		var1.pred = gstat::krige0(formula, data@observations, newdata@observations,
-			gstat::vgmArea, ...)
+			gstat::vgmArea, vgm = model, ...)
 		newdata = addAttrToGeom(newdata@observations, data.frame(var1.pred), FALSE)
 		SpatialAggregation(newdata)
 	}

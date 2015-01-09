@@ -23,10 +23,10 @@
   newdata, ..., ncells = 5000)
 
 \S4method{interpolate}{formula,SpatialAggregation,SpatialField}(formula, data,
-  newdata, ...)
+  newdata, model, ...)
 
 \S4method{interpolate}{formula,SpatialAggregation,SpatialAggregation}(formula,
-  data, newdata, ...)
+  data, newdata, model, ...)
 }
 \arguments{
 \item{formula}{specifing which variable should be interpolated, see also \link[gstat]{krige}}
