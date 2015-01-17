@@ -119,34 +119,6 @@ setMethod("over", c("SpatialField", "SpatialAggregation"),
 		NULL
 	}
 )
-setMethod("$", "SpatialField", function(x, name) x@observations[[name]])
-setMethod("[", "SpatialField", 
-	function(x, i, j, ..., drop = TRUE) SpatialField(
-		x@observations[i, j, ..., drop = drop], x@domain, 
-		cellsArePoints = x@cellsArePoints))
-setMethod("$", "SpatialAggregation", function(x, name) x@observations[[name]])
-setMethod("spplot", "SpatialAggregation", function(obj,...) spplot(obj@observations, ...))
-setMethod("[", "SpatialAggregation", function(x, i, j, ..., drop = TRUE) 
-	SpatialAggregation(x@observations[i, j, ..., drop = drop]))
-double_bracket = function(x, i, j, ...) {
-	if (!("data" %in% slotNames(x@observations)))
-		stop("no [[ method for object without attributes")
-	x@observations@data[[i]]
-}
-double_bracket_repl = function(x, i, j, value) {
-	if (!("data" %in% slotNames(x@observations)))
-		stop("no [[ method for object without attributes")
-	if (is.character(i) && 
-			any(!is.na(match(i, dimnames(coordinates(x@observations))[[2]]))))
-		stop(paste(i, "is already present as a coordinate name!"))
-	x@observations@data[[i]] <- value
-	x
-}
-setMethod("[[", c("SpatialField", "ANY", "missing"), double_bracket)
-setMethod("[[", c("SpatialAggregation", "ANY", "missing"), double_bracket)
-setReplaceMethod("[[", c("SpatialField", "ANY", "missing", "ANY"), double_bracket_repl)
-setMethod("[[", c("SpatialAggregation", "ANY", "missing"), double_bracket)
-setAs("SpatialField", "data.frame", function(from) as(from@observations, "data.frame"))
 
 #' assess whether function has complete coverage over the domain
 #' 

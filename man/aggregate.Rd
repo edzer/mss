@@ -2,16 +2,19 @@
 % Please edit documentation in R/aggregate.R
 \name{aggregate.SpatialField}
 \alias{aggregate}
+\alias{aggregate.SpatialAggregation}
 \alias{aggregate.SpatialEntities}
 \alias{aggregate.SpatialField}
-\title{aggregate SpatialField or SpatialEntities objects}
+\title{aggregate SpatialField, SpatialEntities or SpatialAggregation objects}
 \usage{
 aggregate(x, ...)
 
 \method{aggregate}{SpatialEntities}(x, by, FUN = mean, ...)
+
+\method{aggregate}{SpatialAggregation}(x, by, FUN = mean, ...)
 }
 \arguments{
-\item{x}{object of class \code{SpatialField}}
+\item{x}{object of class \link{SpatialField}, \link{SpatialEntities}, or \link{SpatialAggregation}}
 
 \item{by}{aggregation predicate}
 
@@ -20,6 +23,6 @@ aggregate(x, ...)
 \item{...}{arguments passed on to \code{FUN}}
 }
 \description{
-aggregation methods for objects of class SpatialField or SpatialEntities
+aggregation methods for objects of class SpatialField, SpatialEntities or SpatialAggregation
 }
 

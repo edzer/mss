@@ -14,4 +14,4 @@ License: GPL-2 | file LICENSE
 URL: http://github.com/edzer/mss
 VignetteBuilder: knitr
 Collate: mss.R class-window.R class-entity.R class-field.R class-aggregation.R 
-	field-methods.R entities-methods.R aggregate.R plot.R
+	field-methods.R entities-methods.R aggregate.R plot.R mss-methods.R

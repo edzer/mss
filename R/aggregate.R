@@ -9,22 +9,21 @@
 #' is.sum(mean)
 #' is.sum(function(x) sum(x))
 is.sum = function(x) {
-	paste(deparse(x), collapse="") == paste(deparse(sum),collapse="")
+	paste(deparse(x), collapse="") == paste(deparse(sum), collapse="")
 }
 
-#' aggregate SpatialField or SpatialEntities objects
+#' aggregate SpatialField, SpatialEntities or SpatialAggregation objects
 #'
-#' aggregation methods for objects of class SpatialField or SpatialEntities
+#' aggregation methods for objects of class SpatialField, SpatialEntities or SpatialAggregation
 #' 
 #' @aliases aggregate aggregate.SpatialField
 #' @usage aggregate(x, ...)
-#' @param x object of class \code{SpatialField}
+#' @param x object of class \link{SpatialField}, \link{SpatialEntities}, or \link{SpatialAggregation}
 #' @param by aggregation predicate
 #' @param FUN aggregation function
 #' @param ... arguments passed on to \code{FUN}
 #' @rdname aggregate
-#' @export aggregate.SpatialField
-#' @export aggregate
+#' @export aggregate aggregate.SpatialField
 aggregate.SpatialField = function(x, by, FUN = mean, ...) {
 	if (!is(by, "SpatialAggregation"))
 		stop("argument `by' needs to be of class `SpatialAggregation'")
@@ -44,4 +43,12 @@ aggregate.SpatialEntities = function(x, by, FUN = mean, ...) {
 	if (!is.sum(FUN))
 		maybe_meaningful("aggregation using a non-sum function")
 	SpatialAggregation(aggregate(x@observations, by@observations, FUN = FUN, ...))
+}
+#' @rdname aggregate
+#' @export aggregate.SpatialAggregation
+aggregate.SpatialAggregation = function(x, by, FUN = mean, ...) {
+	if (!is(by, "numeric"))
+		stop("argument `by' needs to be numeric")
+	# SpatialAggregation(aggregate(x@observations, by@observations, FUN = FUN, ...))
+	stop("not yet implemented")
 }

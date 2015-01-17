@@ -137,14 +137,17 @@ plot(pts, col = 'red', pch = 16, add = TRUE)
 plot(meuse.grid[1:21,], add = TRUE)
 text(coordinates(pts), c("1", "2"), pos = 2)
 ```
-Querying a spatial field where cells are points gives:
+
+Querying a spatial field where cells are points gives non-missing
+values only when the point coincides with the grid cell centre:
 ```{r}
 f1 = SpatialField(meuse.grid, meuse.area, cellsArePoints = TRUE)
 pts = SpatialField(pts, meuse.grid)
 over(pts, f1)
 ```
 
-Querying a spatial field where cells are constant valued areas gives:
+Querying a spatial field where cells are constant valued areas gives
+the grid cell values of the cells where the point is in:
 ```{r}
 f2 = SpatialField(meuse.grid, meuse.area, cellsArePoints = FALSE)
 over(pts, f2) # matches pts to the complete grid cell
@@ -400,5 +403,5 @@ patterns), or aggregations. The classes in `mss`: `SpatialField`,
 `SpatialEntities`, and `SpatialAggregation`, do.
 
 ## References
-1. E. Pebesma, C. Stasch, B. Gräler and S. Scheider, 2014.  Meaningfully Integrating Big Earth Science Data; AGU fall meeting, poster [IN33A-3757](https://agu.confex.com/agu/fm14/meetingapp.cgi#Paper/3289) [pdf](https://agu.confex.com/data/handout/agu/fm14/Paper_3289_handout_1504_0.pdf)
+1. E. Pebesma, C. Stasch, B. Graeler and S. Scheider, 2014.  Meaningfully Integrating Big Earth Science Data; AGU fall meeting, poster [IN33A-3757](https://agu.confex.com/agu/fm14/meetingapp.cgi#Paper/3289) [pdf](https://agu.confex.com/data/handout/agu/fm14/Paper_3289_handout_1504_0.pdf)
 2. Stasch, C., S. Scheider, E. Pebesma, W. Kuhn, 2014.  Meaningful Spatial Prediction and Aggregation.  Environmental Modelling \& Software, 51, 149-165 [open access](http://www.sciencedirect.com/science/article/pii/S1364815213001977).
