@@ -129,7 +129,7 @@ Spatial grid data can be conceived as having values for
 The difference is illustrated by querying each at two points, one
 coinciding with a grid cell centre, one not coinciding. The two
 points are indicated by red circles:
-```{r}
+```{r, fig.width=9, fig.height=6}
 xy = rbind(coordinates(meuse)[1,], coordinates(meuse.grid)[10,])
 pts = SpatialPoints(xy, CRS(proj4string(meuse.grid)))
 plot(as(meuse.grid[1:21,], "SpatialPolygons"))
@@ -172,7 +172,7 @@ spplot(i1, "var1.pred")
 
 To show that these really concern points, plotting for a smaller region gives
 actual point symbols:
-```{r}
+```{r, fig.width=10, fig.height=4}
 spplot(i1[1:300,], "var1.pred")
 ```
 
