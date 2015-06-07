@@ -35,14 +35,14 @@ setClass("SpatialEntities",
 	validity = function(object) {
 		# check all features are inside window:
 		if (!is.null(object@window) &&
-			any(is.na(over(object@observations, geometry(object@window@area)))))
+				any(is.na(over(object@observations, geometry(object@window@area)))))
 			stop("one or more features are outside the observation window")
 		return(TRUE)
 	}
 )
 SpatialEntities = function(observations, window) {
 	if (missing(window))
-		new("SpatialEntities", observations, NULL)
+		new("SpatialEntities", observations)
 	else if (is(window, "Spatial"))
 		new("SpatialEntities", observations, Window(window))
 	else
@@ -70,9 +70,9 @@ setMethod("initialize", "SpatialEntities", function(.Object, observations, windo
 	if (missing(window)) {
 		warning("window set to the observation data features", call. = FALSE)
 		window = NULL
-	} else # window specified
-		if (any(is.na(over(observations, window@area))))
-			warning("some observations are outside the window", call. = FALSE)
+	} 
+	if (!is.null(window) && any(is.na(over(observations, window@area))))
+		warning("some observations are outside the window", call. = FALSE)
 	.Object@observations = observations
 	.Object@window = window
 	.Object

@@ -379,9 +379,14 @@ over(pts, a)
 ## A5. 
 **Point pattern data often come without observation window, over which aggregation is meaningful**
 
-Attempting to create a `SpatialEntities` object without an observation window leads to a warning, followed by an error:
+Attempting to create a `SpatialEntities` object without an observation window specified gives
+a warning message:
 ```{r}
-tr = try(pts <- SpatialEntities(meuse))
+pts <- SpatialEntities(meuse)
+```
+Providing a window that does not contain all the points gives an error:
+```{r}
+tr = try(pts <- SpatialEntities(meuse, meuse[1:10,]))
 attr(tr, "condition")
 ```
 
