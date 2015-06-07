@@ -21,29 +21,16 @@
 #' @note if \code{area} is not of (a subclass of) class \link[sp]{SpatialPolygons}, \link[sp]{SpatialPixels}, or \link[sp]{SpatialGrid}, an error results.
 #' @name Window
 #' @rdname Window
-#' @aliases Window-class
-#' @exportClass Window
+#' @aliases Window-class WindowOrNULL-class initialize,Window-method
+#' @exportClass Window WindowOrNULL
 #' @export Window
 #' @author Edzer Pebesma
 Window = setClass("Window", slots = c(area = "Spatial"))
-#' initializes (creates) Window objects
-#'
-#' @param .Object (ignore)
-#' @param area object of one of the sublasses of \link[sp]{Spatial}
-#'
-#' @return object of class \link{Window-class}
-#' @note this function should not be called directly, use \link{Window} instead
-#' 
-#' @export
-#' @docType methods
-#' @rdname initialize-Window-methods
-setMethod("initialize", "Window", function(.Object, area) {
-	.Object <- callNextMethod()
-	if (missing(area))
-		stop("area argument needs to be supplied")
-	stopifnot(is(area, "Spatial")) # should be automatic
-	if (!(gridded(area) || is(area, "SpatialPolygons")))
-		stop("Window object needs to reflect an area, as grid or polygons")
-	.Object@area = area
-	.Object
-})
+setMethod("initialize", "Window", 
+	function(.Object, area) {
+		.Object <- callNextMethod()
+		.Object@area = area
+		.Object
+	}
+)
+setClassUnion("WindowOrNULL", c("Window", "NULL"))

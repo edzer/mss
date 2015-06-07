@@ -12,6 +12,7 @@ if (!isGeneric("interpolate"))
 #' @param data object of class \link{SpatialField-class}
 #' @param newdata target locations; if missing, points are chosen from the domain of \code{data}
 #' @param ncells in case no newdata is provided and point support interpolations are computed over a polygon area, the approximate number of grid cells (default 5000)
+#' @param model covariance model, see \link[gstat]{krige} and \link[gstat]{vgm}
 #' @param ... passed on to \link[gstat]{krige}
 #'
 #' @return object of class \link{SpatialField-class}
@@ -22,6 +23,15 @@ if (!isGeneric("interpolate"))
 #' @export
 #' @docType methods
 #' @aliases interpolate,formula,SpatialField,SpatialField-method interpolate,formula,SpatialField,missing-method interpolate,formula,SpatialField,SpatialAggregation-method interpolate,formula,SpatialAggregation,SpatialField-method interpolate,formula,SpatialAggregation,SpatialAggregation-method
+#' @examples
+#' library(sp)
+#' demo(meuse, ask = FALSE, echo = FALSE)
+#' sf = SpatialField(meuse, Window(meuse.grid))
+#' p = interpolate(zinc~1, sf)
+#' spplot(p)
+#' sf = SpatialField(meuse, Window(meuse.area))
+#' p = interpolate(zinc~1, sf)
+#' spplot(p)
 setMethod("interpolate", c("formula", "SpatialField", "SpatialField"),
 	function(formula, data, newdata, ...) {
 		if (any(is.na(over(newdata@observations, data@domain@area))))
@@ -42,13 +52,14 @@ setMethod("interpolate", c("formula", "SpatialField", "SpatialField"),
 #' @rdname interpolate
 #' @export
 setMethod("interpolate", c("formula", "SpatialField", "missing"),
-	function(formula, data, newdata, ..., ncells = 5000) {
+	function(formula, data, ..., ncells = 5000) {
 		newdata = data@domain@area
 		if (!gridded(newdata)) {
-			newdata = spsample(newdata, ncells, "regular")
-			gridded(newdata) = TRUE
-		}
-		interpolate(formula, data, SpatialField(newdata, newdata, cellsArePoints = TRUE), ...)
+			where = spsample(newdata, ncells, "regular")
+			gridded(where) = TRUE
+		} else
+			where = newdata
+		interpolate(formula, data, SpatialField(where, Window(newdata), cellsArePoints = TRUE), ...)
 })
 #' @rdname interpolate
 #' @export
@@ -130,11 +141,10 @@ setMethod("over", c("SpatialField", "SpatialAggregation"),
 #' @export
 full.coverage = function(x) {
 	stopifnot(is(x, "SpatialField"))
-	if (x@observationsEqualDomain)
-		return(TRUE)
-	((gridded(x@domain@area) && ! x@cellsArePoints) || is(x@domain@area, "SpatialPolygons")) &&
-		isTRUE(all.equal(getArea(x@observations), 
-			getArea(x@domain@area))) # allows for numerical fuzz
+	if (is.null(x@domain))
+		TRUE
+	else ((gridded(x@domain@area) && ! x@cellsArePoints) || is(x@domain@area, "SpatialPolygons")) &&
+		isTRUE(all.equal(getArea(x@observations), getArea(x@domain@area))) # allows for numerical fuzz
 }
 #' compute area of a Spatial* object
 #'
@@ -154,8 +164,6 @@ full.coverage = function(x) {
 #' getArea(meuse.area)
 getArea = function(x) {
 	stopifnot(is(x, "Spatial"))
-	if (gridded(x))
-		return(areaSpatialGrid(x))
 	getAreaSP = function(x) { # copied from sp/R/spsample.R:
     		getAreaPolygons = function(x) {
         		holes = unlist(lapply(x@Polygons, function(x) x@hole))
@@ -163,10 +171,11 @@ getArea = function(x) {
         		area = ifelse(holes, -1, 1) * areas
         		area
     		}
-    		sum(unlist(lapply(x@polygons, getAreaPolygons)))
+    		sum(sapply(x@polygons, getAreaPolygons))
 	}
-	if (is(x, "SpatialPolygons"))
-		return(getAreaSP(x))
-	# lines, points:
-	return(0.0)
+	if (gridded(x))
+		areaSpatialGrid(x)
+	else if (is(x, "SpatialPolygons"))
+		getAreaSP(x)
+	else 0.0 # lines, points:
 }

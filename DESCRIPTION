@@ -1,8 +1,8 @@
 Package: mss
 Title: Meaningful Spatial Statistics
-Description: classes and methods for meaningful spatial statistics
-Version: 0.2-0
-Date: 2014-12-28
+Description: Classes and methods for meaningful spatial statistics.
+Version: 0.3-0
+Date: 2014-06-07
 Authors@R: c(person("Edzer", "Pebesma", role = c("cre", "aut"),
     email = "edzer.pebesma@uni-muenster.de"),
     person("Christoph", "Stasch", role = "ctb"))
