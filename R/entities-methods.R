@@ -12,7 +12,6 @@
 #'
 #' @return object of class \link{SpatialField-class}
 #' 
-#' @export density.SpatialEntities
 #' @export density
 #' @export
 density.SpatialEntities = function(x, bandwidth, newdata, ncells = 5000, ...) {
