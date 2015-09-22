@@ -23,7 +23,8 @@ is.sum = function(x) {
 #' @param FUN aggregation function
 #' @param ... arguments passed on to \code{FUN}
 #' @rdname aggregate
-#' @export aggregate aggregate.SpatialField
+#' @export aggregate
+#' @S3method aggregate SpatialField
 aggregate.SpatialField = function(x, by, FUN = mean, ...) {
 	if (!is(by, "SpatialAggregation"))
 		stop("argument `by' needs to be of class `SpatialAggregation'")
@@ -34,7 +35,8 @@ aggregate.SpatialField = function(x, by, FUN = mean, ...) {
 	SpatialAggregation(aggregate(x@observations, by@observations, FUN = FUN, ...))
 }
 #' @rdname aggregate
-#' @export aggregate.SpatialEntities
+#' @export aggregate
+#' @S3method aggregate SpatialEntities
 aggregate.SpatialEntities = function(x, by, FUN = mean, ...) {
 	if (!is(by, "SpatialAggregation"))
 		stop("argument `by' needs to be of class `SpatialAggregation'")
@@ -45,7 +47,8 @@ aggregate.SpatialEntities = function(x, by, FUN = mean, ...) {
 	SpatialAggregation(aggregate(x@observations, by@observations, FUN = FUN, ...))
 }
 #' @rdname aggregate
-#' @export aggregate.SpatialAggregation
+#' @export aggregate
+#' @S3method aggregate SpatialAggregation
 aggregate.SpatialAggregation = function(x, by, FUN = mean, ...) {
 	if (!is(by, "numeric"))
 		stop("argument `by' needs to be numeric")
