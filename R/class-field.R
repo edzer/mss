@@ -18,6 +18,7 @@
 #' The domain of a SpatialField object is the area for which the observations are
 #' considered relevant, e.g. by affording interpolation or aggregation.
 #'
+#'
 #'@section Slots: 
 #'  \describe{
 #'    \item{\code{observations}:}{object of a subclass of \link[sp]{Spatial}}
