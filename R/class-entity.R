@@ -1,6 +1,6 @@
-#' The SpatialEntities class and constructor function
+#' The SObjects class and constructor function
 #'
-#' SpatialEntities: a Class for Spatial Entities (Objects)
+#' SObjects: a Class for Spatial Entities (Objects)
 #'
 #' A class to store spatial entities, such as trees, buildings and so on,
 #' along with the observed window, the area for which the set of
@@ -13,24 +13,24 @@
 #'    \item{\code{window}}{object of class \link{WindowOrNULL-class}}
 #'  }
 #'
-#' @usage SpatialEntities(observations, window)
+#' @usage SObjects(observations, window)
 #' @param observations object of one of the sublasses of \link{Spatial}
 #' @param window object of class \link{Window} or \link{Spatial}
-#' @return object of class \link{SpatialEntities-class}
+#' @return object of class \link{SObjects-class}
 
-#' @name SpatialEntities-class
-#' @rdname SpatialEntities-class
-#' @aliases SpatialEntities SpatialEntities-class [,SpatialEntities-method [[,SpatialEntities,ANY,missing-method [[<-,SpatialEntities,ANY,missing-method $,SpatialEntities-method
-#' @exportClass SpatialEntities
+#' @name SObjects-class
+#' @rdname SObjects-class
+#' @aliases SObjects SObjects-class [,SObjects-method [[,SObjects,ANY,missing-method [[<-,SObjects,ANY,missing-method $,SObjects-method
+#' @exportClass SObjects
 #' @author Edzer Pebesma
-#' @seealso \link{SpatialField}
+#' @seealso \link{SField}
 #' @note If no window is supplied, the window is set to the collection of features, and a warning is issued. Support is assumed to be that of the features (points, polygons, lines, grid cells) in the \code{observations} object.
 #'
 #' @examples
 #' library(sp)
 #' demo(meuse, ask = FALSE, echo = FALSE)
-#' m = SpatialEntities(meuse, meuse.area)
-setClass("SpatialEntities",
+#' m = SObjects(meuse, meuse.area)
+setClass("SObjects",
 	slots = c(observations = "Spatial", window = "WindowOrNULL"),
 	validity = function(object) {
 		# check all features are inside window:
@@ -40,32 +40,32 @@ setClass("SpatialEntities",
 		return(TRUE)
 	}
 )
-SpatialEntities = function(observations, window) {
+SObjects = function(observations, window) {
 	if (missing(window))
-		new("SpatialEntities", observations)
+		new("SObjects", observations)
 	else if (is(window, "Spatial"))
-		new("SpatialEntities", observations, Window(window))
+		new("SObjects", observations, Window(window))
 	else
-		new("SpatialEntities", observations, window)
+		new("SObjects", observations, window)
 }
-#' SpatialEntities initialize function
+#' SObjects initialize function
 #'
-#' initializes (creates) SpatialEntities objects
+#' initializes (creates) SObjects objects
 #'
 #' @param .Object object to initialize
 #' @param observations object of one of the sublasses of \link{Spatial}
 #' @param window object of class \link{Window}
 #'
-#' @return object of class \link{SpatialEntities-class}
+#' @return object of class \link{SObjects-class}
 #' 
-#' @seealso \link{SpatialField}
+#' @seealso \link{SField}
 #' @note this function is not called directly
 #' 
 #' @export
-#' @export SpatialEntities
+#' @export SObjects
 #' @docType methods
-#' @rdname initialize-SpatialEntities-methods
-setMethod("initialize", "SpatialEntities", function(.Object, observations, window) {
+#' @rdname initialize-SObjects-methods
+setMethod("initialize", "SObjects", function(.Object, observations, window) {
 	.Object <- callNextMethod()
 	if (missing(window)) {
 		warning("window set to the observation data features", call. = FALSE)

@@ -10,13 +10,13 @@ This vignette introduces an R package for meaningful spatial statistics,
 library(mss)
 ```
 
-The package introduces three classes for spatial data: `SpatialField`
-for representing geostatistical data, `SpatialEntities` for
-point patterns, and `SpatialAggregation` for lattice (areal)
+The package introduces three classes for spatial data: `SField`
+for representing geostatistical data, `SObjects` for
+point patterns, and `SLattice` for lattice (areal)
 data.
 
 ## `Window`: field domain or observation windows
-`SpatialField` and `SpatialEntities` contain a `Window`,
+`SField` and `SObjects` contain a `Window`,
 representing the domain of the field, or the window of observation
 for a point pattern.  
 
@@ -35,24 +35,24 @@ or by a polygon or set of polygons, as in
 w1 = Window(meuse.area)
 ```
 
-## `SpatialField`: geostatistical data
-SpatialFields represent _continuous_ functions, which over a
+## `SField`: geostatistical data
+SFields represent _continuous_ functions, which over a
 domain $D$ have a value at every _point_ $s \in D$.
 ```{r}
-showClass("SpatialField")
+showClass("SField")
 ```
 ### Fields from points
 Observations on fields variables are often done on irregular
 point locations. Such a field variable is created from a
 `SpatialPointsDataFrame` object:
 ```{r}
-sf = SpatialField(meuse, meuse.grid)
+sf = SField(meuse, meuse.grid)
 ```
 where, here, `meuse.grid` defines the domain for the
 field. Alternatively, _point observations_ can be gridded, and
 defined as a field by
 ```{r}
-sf = SpatialField(meuse.grid, meuse.grid, cellsArePoints = TRUE)
+sf = SField(meuse.grid, meuse.grid, cellsArePoints = TRUE)
 ```
 Note that the first argument defines the point observations, and 
 the second argument the domain: the first argument is treated as
@@ -62,7 +62,7 @@ gridded set of areas (cells).
 We can alternatively assume that each grid cell represents an area
 with constant point values. Such a field is defined by:
 ```{r}
-sf = SpatialField(meuse.grid, meuse.grid, cellsArePoints = FALSE)
+sf = SField(meuse.grid, meuse.grid, cellsArePoints = FALSE)
 ```
 This field is completely known, for every point location. Note
 that grid cell values are _constant throughout the cell_, and are
@@ -79,46 +79,46 @@ library(rgeos)
 cl = ContourLines2SLDF(contourLines(as.image.SpatialGridDataFrame(
   meuse.grid["dist"])))
 proj4string(cl) = CRS(proj4string(meuse.grid))
-sf.lines = SpatialField(cl, meuse.grid)
+sf.lines = SField(cl, meuse.grid)
 ```
 or, alternatively, as a set of polygons; in this example, a single
 polygon with a constant value:
 ```{r}
 pol = addAttrToGeom(meuse.area, data.frame(value = 3), FALSE)
-sf.pol = SpatialField(pol, meuse.area)
+sf.pol = SField(pol, meuse.area)
 ```
-## `SpatialEntities`: point patterns or objects
-The `SpatialEntities` class can be used to represent objects in a space,
+## `SObjects`: point patterns or objects
+The `SObjects` class can be used to represent objects in a space,
 where the _window of observation_ reflects the area for which all
 points or objects are available:
 ```{r}
-showClass("SpatialEntities")
+showClass("SObjects")
 ```
 We can create a point pattern e.g. for the sample locations of the `meuse`
 data set:
 ```{r}
 pts = geometry(meuse)
-se.pts = SpatialEntities(pts, meuse.area)
+se.pts = SObjects(pts, meuse.area)
 ```
 but also areas can indicate entities:
 ```{r}
-se.area = SpatialEntities(meuse.area, meuse.area)
+se.area = SObjects(meuse.area, meuse.area)
 ```
 
-## `SpatialAggregation`: areal data
+## `SLattice`: areal data
 Aggregations refer to values, measured or computed as the aggregate
 over a set of (point) values, e.g. the mean, maximum or minimum value.
 As such, aggregations need to be defined for _sets of points_, i.e.
 for lines, polygons, or grid cells:
 ```{r}
-showClass("SpatialAggregation")
+showClass("SLattice")
 ```
 _Sets of points_ can be represented by anything but points: lines, grids,
 and polygons:
 ```{r}
-sa.1 = SpatialAggregation(cl)
-sa.3 = SpatialAggregation(meuse.grid)
-sa.2 = SpatialAggregation(pol)
+sa.1 = SLattice(cl)
+sa.3 = SLattice(meuse.grid)
+sa.2 = SLattice(pol)
 ```
 
 ## Three interpretations of a spatial grid
@@ -141,21 +141,21 @@ text(coordinates(pts), c("1", "2"), pos = 2)
 Querying a spatial field where cells are points gives non-missing
 values only when the point coincides with the grid cell centre:
 ```{r}
-f1 = SpatialField(meuse.grid, meuse.area, cellsArePoints = TRUE)
-pts = SpatialField(pts, meuse.grid)
+f1 = SField(meuse.grid, meuse.area, cellsArePoints = TRUE)
+pts = SField(pts, meuse.grid)
 over(pts, f1)
 ```
 
 Querying a spatial field where cells are constant valued areas gives
 the grid cell values of the cells where the point is in:
 ```{r}
-f2 = SpatialField(meuse.grid, meuse.area, cellsArePoints = FALSE)
+f2 = SField(meuse.grid, meuse.area, cellsArePoints = FALSE)
 over(pts, f2) # matches pts to the complete grid cell
 ```
 Querying a grid where cell values are aggregations does not answer and
 generates a warning:
 ```{r}
-a = SpatialAggregation(meuse.grid)
+a = SLattice(meuse.grid)
 over(pts, a)
 ```
 
@@ -164,7 +164,7 @@ over(pts, a)
 ### point-to-point interpolation
 We can predict to points, laid out regularly, inside the polygon of the field domain:
 ```{r}
-m = SpatialField(meuse, meuse.area)
+m = SField(meuse, meuse.area)
 v = gstat::vgm(.6, "Sph", 900, .05) # variogram model
 i1 = interpolate(log(zinc)~1, m, model = v)
 spplot(i1, "var1.pred")
@@ -179,7 +179,7 @@ spplot(i1[1:300,], "var1.pred")
 Alternatively, we can predict values on a pre-defined grid, taken
 from the domain:
 ```{r}
-m = SpatialField(meuse, meuse.grid)
+m = SField(meuse, meuse.grid)
 i2 = interpolate(log(zinc)~1, m, model = v)
 print(as(i2[1:3,], "data.frame"), digits = 10) # point support
 ```
@@ -188,7 +188,7 @@ print(as(i2[1:3,], "data.frame"), digits = 10) # point support
 From point values, we can predict the polygon area mean value:
 ```{r}
 library(rgeos)
-m3 = SpatialAggregation(meuse.area)
+m3 = SLattice(meuse.area)
 i3 = interpolate(log(zinc)~1, m, m3, model = v) # interpolate from point TO polygon support
 i3$var1.pred # a single value, estimate of mean for the whole area
 mean(log(m$zinc)) # sample mean
@@ -196,7 +196,7 @@ mean(i1$var1.pred) # mean of predictions, similar to i2$var1.pred
 ```
 or predict values for grid cell averages (block kriging):
 ```{r}
-m4 = SpatialAggregation(meuse.grid)
+m4 = SLattice(meuse.grid)
 i4 = interpolate(log(zinc)~1, m, m4, model = v) # interpolate from point TO feature (cell) support
 print(as(i4[1:3,], "data.frame"), digits = 10) # grid cells support
 spplot(i4, "var1.pred")
@@ -220,33 +220,33 @@ The first case is when the grid cell data represent
 point support values at the grid cell centre, which
 is identical to case `i1` above:
 ```{r}
-sf = SpatialField(as(sgdf, "SpatialPointsDataFrame"), sgdf)
+sf = SField(as(sgdf, "SpatialPointsDataFrame"), sgdf)
 vm = gstat::vgm(1, "Exp", 1)
-i5 = interpolate(r~1, sf, SpatialField(pt.red, sgdf), model = vm)
+i5 = interpolate(r~1, sf, SField(pt.red, sgdf), model = vm)
 as(i5[1,], "data.frame")
 ```
 The second case, grid cells represent constant area with
 point support value, meaning that every point location within
 a grid cell has the value of the grid cell assigned:
 ```{r}
-sf = SpatialField(sgdf, sgdf, cellsArePoints = FALSE)
-i6 = interpolate(r~1, sf, SpatialField(pt.red, sgdf), model = vm)
+sf = SField(sgdf, sgdf, cellsArePoints = FALSE)
+i6 = interpolate(r~1, sf, SField(pt.red, sgdf), model = vm)
 as(i6[1,], "data.frame") # does not interpolate, but queries grid cell
 ```
 as case `i4` above, from point values we can predict a mean value for a grid cell by
 ```{r}
-sf = SpatialField(sgdf, sgdf, cellsArePoints = TRUE)
+sf = SField(sgdf, sgdf, cellsArePoints = TRUE)
 gt = GridTopology(cellcentre.offset = c(.25,.25), cellsize = c(1,1), cells.dim = c(1,1))
 grd.red = SpatialGrid(gt)
-i7 = interpolate(r~1, sf, SpatialAggregation(grd.red), model = vm)
+i7 = interpolate(r~1, sf, SLattice(grd.red), model = vm)
 i7@observations@data
 ```
 
 ### Area-to-point kriging
 ```{r}
 sp = as(sgdf, "SpatialPolygonsDataFrame")
-gf = SpatialAggregation(sp)
-kr = interpolate(r~1, gf, SpatialField(pt.red, sp), model = vm)
+gf = SLattice(sp)
+kr = interpolate(r~1, gf, SField(pt.red, sp), model = vm)
 kr@observations[[1]]
 library(gstat)
 krige0(r ~ 1, sp, pt.red, vgmArea, vgm = vm) # check
@@ -260,7 +260,7 @@ grd = addAttrToGeom(gr, data.frame(r=0), FALSE)
 plot(as(sgdf, "SpatialPolygons"), axes = TRUE)
 text(coordinates(sgdf), labels = sgdf[[1]])
 plot(grd, add = TRUE, border = 'red')
-kr = interpolate(r~1, gf, SpatialAggregation(grd), model = vm)
+kr = interpolate(r~1, gf, SLattice(grd), model = vm)
 kr@observations[[1]]
 krige0(r ~ 1, sp, grd, vgmArea, vgm = vm) # check
 ```
@@ -269,7 +269,7 @@ krige0(r ~ 1, sp, grd, vgmArea, vgm = vm) # check
 For `SpatialEntity` objects, we can estimate the density of objects; this
 method reuses `MASS:kde2d`:
 ```{r}
-e = SpatialEntities(meuse, meuse.area)
+e = SObjects(meuse, meuse.area)
 d = density(e, newdata = meuse.grid)
 lt = list(list("sp.polygons", meuse.area, border = 'black',
 	first=FALSE), list("sp.points", meuse, col = grey(.5), pch = 16))
@@ -277,7 +277,7 @@ class(d)
 spplot(d, sp.layout = lt)
 ```
 
-The reason why this returns a `SpatialAggregation` is that the
+The reason why this returns a `SLattice` is that the
 values computed (densities) do not correspond to quantities that are
 measurable at point locations where they are registered (grid cells).
 In fact, they are aggregated values for areas even much larger than
@@ -285,21 +285,21 @@ the grid cells.
 
 ## Spatial Aggregation
 
-### for `SpatialField` data
+### for `SField` data
 ```{r}
-m = SpatialField(meuse["zinc"], meuse.area)
-a = aggregate(m, SpatialAggregation(meuse.area), mean) # no warning
+m = SField(meuse["zinc"], meuse.area)
+a = aggregate(m, SLattice(meuse.area), mean) # no warning
 a[[1]]
-a = aggregate(m, SpatialAggregation(meuse.area), sum) # warns:
+a = aggregate(m, SLattice(meuse.area), sum) # warns:
 a[[1]]
 ```
 
 ### for `SpatialEntity` data
 ```{r}
-m = SpatialEntities(meuse["zinc"], meuse.area)
-a = aggregate(m, SpatialAggregation(meuse.area), mean) # warns:
+m = SObjects(meuse["zinc"], meuse.area)
+a = aggregate(m, SLattice(meuse.area), mean) # warns:
 a[[1]]
-a = aggregate(m, SpatialAggregation(meuse.area), sum) # no warning
+a = aggregate(m, SLattice(meuse.area), sum) # no warning
 a[[1]]
 ```
 
@@ -312,15 +312,15 @@ make assertions A1-A7.
 **A prediction is meaningful, if it provides an estimate for a potential observation
 Prediction on a field variable generates no warning.**
 
-Where prediction of a `SpatialField` varialbe generates no warning,
+Where prediction of a `SField` varialbe generates no warning,
 ```{r}
-m = SpatialField(meuse, meuse.area) # data are point support
+m = SField(meuse, meuse.area) # data are point support
 res = interpolate(log(zinc)~1, m) # interpolate from point TO point support
 ```
 prediction of a point pattern variable generates a warning:
 ```{r}
-m = SpatialEntities(meuse, meuse.area)
-sa = SpatialAggregation(meuse.grid)
+m = SObjects(meuse, meuse.area)
+sa = SLattice(meuse.grid)
 res = interpolate(log(zinc)~1, m, sa) # interpolate point pattern variable: warns
 ```
 ## A2. 
@@ -334,8 +334,8 @@ y = bbox(meuse)[2,]
 bb = Polygon(cbind(c(x[1],x[1],x[2],x[2],x[1]), c(y[1],y[2],y[2],y[1],y[1])))
 bbx = SpatialPolygons(list(Polygons(list(bb),"bbox_meuse")),
 	proj4string = CRS(proj4string(meuse)))
-m = SpatialEntities(meuse["zinc"], meuse.area)
-a = aggregate(m, SpatialAggregation(bbx), sum) # warns:
+m = SObjects(meuse["zinc"], meuse.area)
+a = aggregate(m, SLattice(bbx), sum) # warns:
 ```
 Stasch et al. [2014](http://www.sciencedirect.com/science/article/pii/S1364815213001977)
 prove A1 and A2 more formally.
@@ -345,19 +345,19 @@ Further assertions in the poster:
 **Polygon data may reflect constant values over areas (geology) or means 
 (population density), this matters for (further) aggregation or downsampling.**
 
-Package `mss` distinguishes between `SpatialField` and
-`SpatialAggregation` to represent constant values, and aggregations,
-respectively. Subsampling `SpatialField` variabls does not not warn,
+Package `mss` distinguishes between `SField` and
+`SLattice` to represent constant values, and aggregations,
+respectively. Subsampling `SField` variabls does not not warn,
 ```{r}
 area = addAttrToGeom(meuse.area, data.frame(v=1), match.ID = FALSE)
-f = SpatialField(area, meuse.area)
-pts = SpatialField(meuse[1:5,], meuse.area)
+f = SField(area, meuse.area)
+pts = SField(meuse[1:5,], meuse.area)
 over(pts, f) # retrieve f at the points of pts:
 ```
-but subsampling `SpatialAggregation` variables triggers a warning, and no
+but subsampling `SLattice` variables triggers a warning, and no
 useful value
 ```{r}
-a = SpatialAggregation(area)
+a = SLattice(area)
 over(pts, a)
 ```
 as it should really disaggregate first, from area to point.
@@ -365,28 +365,28 @@ as it should really disaggregate first, from area to point.
 ## A4.
 **The same is true for grid cells.**
 
-`SpatialField` and `SpatialAggregation` both generalize polygon and grid data.
+`SField` and `SLattice` both generalize polygon and grid data.
 ```{r}
-f1 = SpatialField(meuse.grid, meuse.area, cellsArePoints = TRUE)
-pts = SpatialField(meuse[1:5,], meuse.area)
+f1 = SField(meuse.grid, meuse.area, cellsArePoints = TRUE)
+pts = SField(meuse[1:5,], meuse.area)
 over(pts, f1) # matches pts to grid cell center points:
-f2 = SpatialField(meuse.grid, meuse.area, cellsArePoints = FALSE)
+f2 = SField(meuse.grid, meuse.area, cellsArePoints = FALSE)
 over(pts, f2) # matches pts to the complete grid cell
-a = SpatialAggregation(meuse.grid)
+a = SLattice(meuse.grid)
 over(pts, a)
 ```
 
 ## A5. 
 **Point pattern data often come without observation window, over which aggregation is meaningful**
 
-Attempting to create a `SpatialEntities` object without an observation window specified gives
+Attempting to create a `SObjects` object without an observation window specified gives
 a warning message:
 ```{r}
-pts <- SpatialEntities(meuse)
+pts <- SObjects(meuse)
 ```
 Providing a window that does not contain all the points gives an error:
 ```{r}
-tr = try(pts <- SpatialEntities(meuse, meuse[1:10,]))
+tr = try(pts <- SObjects(meuse, meuse[1:10,]))
 attr(tr, "condition")
 ```
 
@@ -394,8 +394,8 @@ attr(tr, "condition")
 **Field measurements often come without a notion for which locations interpolations based on them make sense.**
 
 ```{r}
-m = SpatialField(meuse["zinc"], meuse.area)
-a = interpolate(log(zinc)~1, m, SpatialAggregation(bbx)) # warns:
+m = SField(meuse["zinc"], meuse.area)
+a = interpolate(log(zinc)~1, m, SLattice(bbx)) # warns:
 ```
 
 ## A7. 
@@ -404,8 +404,8 @@ a = interpolate(log(zinc)~1, m, SpatialAggregation(bbx)) # warns:
 `SpatialPoints`, `SpatialPixels`, `SpatialGrid`, `SpatialLines`,
 `SpatialPolygons` and their `*DataFrame` counterparts do not inform
 whether data concern fields (geostatistical data), entities (point
-patterns), or aggregations. The classes in `mss`: `SpatialField`,
-`SpatialEntities`, and `SpatialAggregation`, do.
+patterns), or aggregations. The classes in `mss`: `SField`,
+`SObjects`, and `SLattice`, do.
 
 ## References
 1. E. Pebesma, C. Stasch, B. Graeler and S. Scheider, 2014.  Meaningfully Integrating Big Earth Science Data; AGU fall meeting, poster [IN33A-3757](https://agu.confex.com/agu/fm14/meetingapp.cgi#Paper/3289) [pdf](https://agu.confex.com/data/handout/agu/fm14/Paper_3289_handout_1504_0.pdf)

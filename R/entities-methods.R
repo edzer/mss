@@ -1,27 +1,27 @@
-#' SpatialEntities density method
+#' SObjects density method
 #'
-#' density estimate for SpatialEntities data
+#' density estimate for SObjects data
 #'
-#' @aliases density density.SpatialEntities
-#' @param x object of class \link{SpatialEntities-class}
+#' @aliases density density.SObjects
+#' @param x object of class \link{SObjects-class}
 #' @param bandwidth bandwidth parameter (see \link[MASS]{kde2d})
 #' @param newdata target grid; if omitted, a grid over the window is created
 #' @param ncells in case no newdata is provided and window is a polygon, the approximate number of grid cells for the grid created
 #' @param ... ignored
 #' @rdname density
 #'
-#' @return object of class \link{SpatialField-class}
+#' @return object of class \link{SField-class}
 #' 
 #' @export density
 #' @export
-density.SpatialEntities = function(x, bandwidth, newdata, ncells = 5000, ...) {
+density.SObjects = function(x, bandwidth, newdata, ncells = 5000, ...) {
 	if (missing(newdata)) {
 		newdata = x@window@area
 		if (!gridded(newdata)) {
 			newdata = spsample(newdata, ncells, "regular")
 			gridded(newdata) = TRUE
 		}
-	} else if (is(newdata, "SpatialField"))
+	} else if (is(newdata, "SField"))
 		newdata = newdata@observations
 	if (!requireNamespace("MASS", quietly = TRUE))
 		stop("package MASS required")
@@ -36,14 +36,14 @@ density.SpatialEntities = function(x, bandwidth, newdata, ncells = 5000, ...) {
 	a = addAttrToGeom(n, data.frame(density = as.vector(k$z[,ncol(k$z):1,drop=FALSE])))
 	a = a[newdata,]
 	fullgrid(a) = fullgrid(newdata) # if wanted, coerce to SpatialPixelsDataFrame
-	#SpatialField(a, newdata, cellsArePoints = TRUE)
-	SpatialAggregation(a)
+	#SField(a, newdata, cellsArePoints = TRUE)
+	SLattice(a)
 }
 #' @rdname interpolate
 #' @export
-setMethod("interpolate", c("formula", "SpatialEntities", "ANY"),
+setMethod("interpolate", c("formula", "SObjects", "ANY"),
 	function(formula, data, newdata, ...) {
-		not_meaningful("interpolation of SpatialEntities")
+		not_meaningful("interpolation of SObjects")
 		data
 	}
 )

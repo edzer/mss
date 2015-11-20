@@ -13,30 +13,30 @@ double_bracket_repl = function(x, i, j, value) {
 	x@observations@data[[i]] <- value
 	x
 }
-# SpatialField:
-setMethod("[[", c("SpatialField", "ANY", "missing"), double_bracket)
-setReplaceMethod("[[", c("SpatialField", "ANY", "missing", "ANY"), double_bracket_repl)
-setMethod("$", "SpatialField", function(x, name) x@observations[[name]])
-setMethod("[", "SpatialField", 
-	function(x, i, j, ..., drop = TRUE) SpatialField(
+# SField:
+setMethod("[[", c("SField", "ANY", "missing"), double_bracket)
+setReplaceMethod("[[", c("SField", "ANY", "missing", "ANY"), double_bracket_repl)
+setMethod("$", "SField", function(x, name) x@observations[[name]])
+setMethod("[", "SField", 
+	function(x, i, j, ..., drop = TRUE) SField(
 		x@observations[i, j, ..., drop = drop], x@domain, 
 		cellsArePoints = x@cellsArePoints))
-setAs("SpatialField", "data.frame", function(from) as(from@observations, "data.frame"))
+setAs("SField", "data.frame", function(from) as(from@observations, "data.frame"))
 
-# SpatialAggregation
-setMethod("[[", c("SpatialAggregation", "ANY", "missing"), double_bracket)
-setReplaceMethod("[[", c("SpatialAggregation", "ANY", "missing", "ANY"), double_bracket_repl)
-setMethod("$", "SpatialAggregation", function(x, name) x@observations[[name]])
-setMethod("spplot", "SpatialAggregation", function(obj,...) spplot(obj@observations, ...))
-setMethod("[", "SpatialAggregation", function(x, i, j, ..., drop = TRUE) 
-	SpatialAggregation(x@observations[i, j, ..., drop = drop]))
-setAs("SpatialAggregation", "data.frame", function(from) as(from@observations, "data.frame"))
+# SLattice
+setMethod("[[", c("SLattice", "ANY", "missing"), double_bracket)
+setReplaceMethod("[[", c("SLattice", "ANY", "missing", "ANY"), double_bracket_repl)
+setMethod("$", "SLattice", function(x, name) x@observations[[name]])
+setMethod("spplot", "SLattice", function(obj,...) spplot(obj@observations, ...))
+setMethod("[", "SLattice", function(x, i, j, ..., drop = TRUE) 
+	SLattice(x@observations[i, j, ..., drop = drop]))
+setAs("SLattice", "data.frame", function(from) as(from@observations, "data.frame"))
 
-# SpatialEntities
-setMethod("[[", c("SpatialEntities", "ANY", "missing"), double_bracket)
-setReplaceMethod("[[", c("SpatialEntities", "ANY", "missing", "ANY"), double_bracket_repl)
-setMethod("$", "SpatialEntities", function(x, name) x@observations[[name]])
-setMethod("spplot", "SpatialEntities", function(obj,...) spplot(obj@observations, ...))
-setMethod("[", "SpatialEntities", function(x, i, j, ..., drop = TRUE) 
-	SpatialAggregation(x@observations[i, j, ..., drop = drop]))
-setAs("SpatialEntities", "data.frame", function(from) as(from@observations, "data.frame"))
+# SObjects
+setMethod("[[", c("SObjects", "ANY", "missing"), double_bracket)
+setReplaceMethod("[[", c("SObjects", "ANY", "missing", "ANY"), double_bracket_repl)
+setMethod("$", "SObjects", function(x, name) x@observations[[name]])
+setMethod("spplot", "SObjects", function(obj,...) spplot(obj@observations, ...))
+setMethod("[", "SObjects", function(x, i, j, ..., drop = TRUE) 
+	SLattice(x@observations[i, j, ..., drop = drop]))
+setAs("SObjects", "data.frame", function(from) as(from@observations, "data.frame"))
