@@ -26,10 +26,10 @@ if (!isGeneric("interpolate"))
 #' @examples
 #' library(sp)
 #' demo(meuse, ask = FALSE, echo = FALSE)
-#' sf = SField(meuse, Window(meuse.grid))
+#' sf = SField(meuse, SExtent(meuse.grid))
 #' p = interpolate(zinc~1, sf)
 #' spplot(p)
-#' sf = SField(meuse, Window(meuse.area))
+#' sf = SField(meuse, SExtent(meuse.area))
 #' p = interpolate(zinc~1, sf)
 #' spplot(p)
 setMethod("interpolate", c("formula", "SField", "SField"),
@@ -59,7 +59,7 @@ setMethod("interpolate", c("formula", "SField", "missing"),
 			gridded(where) = TRUE
 		} else
 			where = newdata
-		interpolate(formula, data, SField(where, Window(newdata), cellsArePoints = TRUE), ...)
+		interpolate(formula, data, SField(where, SExtent(newdata), cellsArePoints = TRUE), ...)
 })
 #' @rdname interpolate
 #' @export
@@ -86,7 +86,7 @@ setMethod("interpolate", c("formula", "SLattice", "SField"),
 		if (!requireNamespace("gstat", quietly = TRUE))
 			stop("package gstat required")
 		if (isTRUE(obs_extends_window(newdata@observations, 
-				Window(data@observations))))
+				SExtent(data@observations))))
 			not_meaningful("interpolating over an area larger than the domain")
 		var1.pred = gstat::krige0(formula, data@observations, newdata@observations,
 			gstat::vgmArea, vgm = model, ...)
@@ -101,7 +101,7 @@ setMethod("interpolate", c("formula", "SLattice", "SLattice"),
 		if (!requireNamespace("gstat", quietly = TRUE))
 			stop("package gstat required")
 		if (isTRUE(obs_extends_window(newdata@observations, 
-				Window(data@observations))))
+				SExtent(data@observations))))
 			not_meaningful("interpolating over an area larger than the domain")
 		var1.pred = gstat::krige0(formula, data@observations, newdata@observations,
 			gstat::vgmArea, vgm = model, ...)

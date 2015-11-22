@@ -12,7 +12,7 @@
 
 \item{observations}{object of one of the sublasses of \link{Spatial}}
 
-\item{window}{object of class \link{Window}}
+\item{window}{object of class \link{SExtent}}
 }
 \value{
 object of class \link{SObjects-class}

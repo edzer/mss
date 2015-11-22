@@ -22,13 +22,13 @@
 #'@section Slots: 
 #'  \describe{
 #'    \item{\code{observations}:}{object of a subclass of \link[sp]{Spatial}}
-#'    \item{\code{domain}:}{object of class \link{WindowOrNULL-class}}
+#'    \item{\code{domain}:}{object of class \link{SExtentOrNULL-class}}
 #'    \item{\code{cellsArePoints}}{logical; do grid cell values reflect point values at the grid cell centre (TRUE) or constant point values throughout the whole grid cell (FALSE)?}
 #'  }
 #'
 #' @usage SField(observations, domain, cellsArePoints = NA)
 #' @param observations object of one of the sublasses of \link[sp]{Spatial}
-#' @param domain object of class \link{Window}, or of a subclass of \link[sp]{Spatial}; if missing, it is assumed to be identical to \code{observations}
+#' @param domain object of class \link{SExtent}, or of a subclass of \link[sp]{Spatial}; if missing, it is assumed to be identical to \code{observations}
 #' @param cellsArePoints logical; do grid cell values reflect point values at the grid cell centre (TRUE) or constant point values throughout the whole grid cell (FALSE)?
 #' @return object of class \link{SField-class}
 
@@ -47,13 +47,13 @@
 #' m = SField(meuse, meuse.area)
 
 setClass("SField",
-	slots = c(observations = "Spatial", domain = "WindowOrNULL", cellsArePoints = "logical"))
+	slots = c(observations = "Spatial", domain = "SExtentOrNULL", cellsArePoints = "logical"))
 
 SField = function(observations, domain, cellsArePoints = NA) {
 	if (missing(domain))
 		new("SField", observations, cellsArePoints = cellsArePoints)
 	else if (is(domain, "Spatial"))
-		new("SField", observations, Window(domain), cellsArePoints = cellsArePoints)
+		new("SField", observations, SExtent(domain), cellsArePoints = cellsArePoints)
 	else
 		new("SField", observations, domain, cellsArePoints = cellsArePoints)
 }
@@ -65,7 +65,7 @@ SField = function(observations, domain, cellsArePoints = NA) {
 #'
 #' @param .Object (ignore)
 #' @param observations object of one of the sublasses of \link[sp]{Spatial}
-#' @param domain object of class \link{Window}, or subclass of \link[sp]{Spatial}
+#' @param domain object of class \link{SExtent}, or subclass of \link[sp]{Spatial}
 #' @param cellsArePoints logical; are grid cells to be taken as point (support) values?
 #'
 #' @return object of class \link{SField-class}

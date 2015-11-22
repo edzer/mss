@@ -10,12 +10,12 @@
 #'@section Slots: 
 #'  \describe{
 #'    \item{\code{observations}}{object of a subclass of \link[sp]{Spatial}}
-#'    \item{\code{window}}{object of class \link{WindowOrNULL-class}}
+#'    \item{\code{window}}{object of class \link{SExtentOrNULL-class}}
 #'  }
 #'
 #' @usage SObjects(observations, window)
 #' @param observations object of one of the sublasses of \link{Spatial}
-#' @param window object of class \link{Window} or \link{Spatial}
+#' @param window object of class \link{SExtent} or \link{Spatial}
 #' @return object of class \link{SObjects-class}
 
 #' @name SObjects-class
@@ -31,7 +31,7 @@
 #' demo(meuse, ask = FALSE, echo = FALSE)
 #' m = SObjects(meuse, meuse.area)
 setClass("SObjects",
-	slots = c(observations = "Spatial", window = "WindowOrNULL"),
+	slots = c(observations = "Spatial", window = "SExtentOrNULL"),
 	validity = function(object) {
 		# check all features are inside window:
 		if (!is.null(object@window) &&
@@ -44,7 +44,7 @@ SObjects = function(observations, window) {
 	if (missing(window))
 		new("SObjects", observations)
 	else if (is(window, "Spatial"))
-		new("SObjects", observations, Window(window))
+		new("SObjects", observations, SExtent(window))
 	else
 		new("SObjects", observations, window)
 }
@@ -54,7 +54,7 @@ SObjects = function(observations, window) {
 #'
 #' @param .Object object to initialize
 #' @param observations object of one of the sublasses of \link{Spatial}
-#' @param window object of class \link{Window}
+#' @param window object of class \link{SExtent}
 #'
 #' @return object of class \link{SObjects-class}
 #' 

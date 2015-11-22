@@ -13,7 +13,7 @@
 
 \item{observations}{object of one of the sublasses of \link[sp]{Spatial}}
 
-\item{domain}{object of class \link{Window}, or subclass of \link[sp]{Spatial}}
+\item{domain}{object of class \link{SExtent}, or subclass of \link[sp]{Spatial}}
 
 \item{cellsArePoints}{logical; are grid cells to be taken as point (support) values?}
 }

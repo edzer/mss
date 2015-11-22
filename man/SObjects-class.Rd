@@ -15,7 +15,7 @@ SObjects(observations, window)
 \arguments{
 \item{observations}{object of one of the sublasses of \link{Spatial}}
 
-\item{window}{object of class \link{Window} or \link{Spatial}}
+\item{window}{object of class \link{SExtent} or \link{Spatial}}
 }
 \value{
 object of class \link{SObjects-class}
@@ -36,7 +36,7 @@ If no window is supplied, the window is set to the collection of features, and a
  
  \describe{
    \item{\code{observations}}{object of a subclass of \link[sp]{Spatial}}
-   \item{\code{window}}{object of class \link{WindowOrNULL-class}}
+   \item{\code{window}}{object of class \link{SExtentOrNULL-class}}
  }
 }
 \examples{

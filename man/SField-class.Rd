@@ -18,7 +18,7 @@ SField(observations, domain, cellsArePoints = NA)
 \arguments{
 \item{observations}{object of one of the sublasses of \link[sp]{Spatial}}
 
-\item{domain}{object of class \link{Window}, or of a subclass of \link[sp]{Spatial}; if missing, it is assumed to be identical to \code{observations}}
+\item{domain}{object of class \link{SExtent}, or of a subclass of \link[sp]{Spatial}; if missing, it is assumed to be identical to \code{observations}}
 
 \item{cellsArePoints}{logical; do grid cell values reflect point values at the grid cell centre (TRUE) or constant point values throughout the whole grid cell (FALSE)?}
 }
@@ -52,7 +52,7 @@ If no domain is supplied, the domain is set to the collection of features. A war
  
  \describe{
    \item{\code{observations}:}{object of a subclass of \link[sp]{Spatial}}
-   \item{\code{domain}:}{object of class \link{WindowOrNULL-class}}
+   \item{\code{domain}:}{object of class \link{SExtentOrNULL-class}}
    \item{\code{cellsArePoints}}{logical; do grid cell values reflect point values at the grid cell centre (TRUE) or constant point values throughout the whole grid cell (FALSE)?}
  }
 }

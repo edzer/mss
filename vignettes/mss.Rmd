@@ -11,28 +11,31 @@ library(mss)
 ```
 
 The package introduces three classes for spatial data: `SField`
-for representing geostatistical data, `SObjects` for
-point patterns, and `SLattice` for lattice (areal)
-data.
+for representing geostatistical data (spatial fields), `SObjects`
+for point patterns (spatial objects), and `SLattice` for lattice
+(areal) data (spatial lattices). The abbreviations follow [this
+paper](http://geographicknowledge.de/pdf/generativealgebra.pdf)
+(which is under review).
 
-## `Window`: field domain or observation windows
-`SField` and `SObjects` contain a `Window`,
-representing the domain of the field, or the window of observation
-for a point pattern.  
+## `SExtent`: extent (window) of field or point pattern
+
+`SField` and `SObjects` objects contain an `SExtent`, representing
+the domain or extent of the field, or the window of observation
+for a point pattern.
 
 The window class defines an area: 
 ```{r}
-showClass("Window")
+showClass("SExtent")
 ```
 The area can be represented either by a grid, as in
 ```{r}
 library(sp)
 demo(meuse, ask = FALSE, echo = FALSE)
-w2 = Window(meuse.grid) # note the grid is passed, not the polygons
+w2 = SExtent(meuse.grid) # note the grid is passed, not the polygons
 ```
 or by a polygon or set of polygons, as in
 ```{r}
-w1 = Window(meuse.area)
+w1 = SExtent(meuse.area)
 ```
 
 ## `SField`: geostatistical data

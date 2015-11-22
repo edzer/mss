@@ -51,10 +51,10 @@ interpolate SField data
 \examples{
 library(sp)
 demo(meuse, ask = FALSE, echo = FALSE)
-sf = SField(meuse, Window(meuse.grid))
+sf = SField(meuse, SExtent(meuse.grid))
 p = interpolate(zinc~1, sf)
 spplot(p)
-sf = SField(meuse, Window(meuse.area))
+sf = SField(meuse, SExtent(meuse.area))
 p = interpolate(zinc~1, sf)
 spplot(p)
 }
