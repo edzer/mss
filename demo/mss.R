@@ -2,6 +2,7 @@ options(warn=1) # print warnings where they occur
 
 library(spatstat) # point patterns -- overwrites idw!
 library(maptools) # convert sp <--> spatstat classes
+library(gstat) # vgm
 library(mss)
 ##############################
 ### SECTION: demonstration scripts
@@ -13,17 +14,17 @@ data(longleaf)
 plot(spatstat::idw(longleaf),main="") # done by spatstat
 # inverse distance interpolation
 plot(longleaf, add = TRUE)
-ll = as(as(longleaf, "SpatialPointsDataFrame"), "PointPatternDataFrame")
+ll = as(longleaf, "SpatialPointsDataFrame")
 grd0 = SpatialPoints(makegrid(ll, 1000))
 gridded(grd0) = TRUE
-
-out <- krige(marks~1, ll, grd0, vgm(1, "Exp", 50))
+ll = SObjects(ll, grd0)
+out <- interpolate(marks~1, ll, SField(grd0, cellsArePoints = TRUE), vgm(1, "Exp", 50))
 # if we would coerce to GeostatisticalDataFrame, then no problem there:
-ll = as(as(longleaf, "SpatialPointsDataFrame"), "GeostatisticalDataFrame")
-out <- krige(marks~1, ll, grd0, vgm(1, "Exp", 50))
-# GeostatisticalDataFrame derives from Spatial, so a krige method is inherited:
-showMethods("krige")
-spplot(out[1])
+ll = as(longleaf, "SpatialPointsDataFrame")
+ll = SField(ll, grd0)
+out <- interpolate(marks~1, ll, SField(grd0, cellsArePoints = TRUE), vgm(1, "Exp", 50))
+
+spplot(out@observations[1])
 
 
 ### 2. Model, as point-pattern, a geostat variable (zinc?)
@@ -51,7 +52,7 @@ plot(Emark(spruces))
 ### 3.1 longleaf pines
 ll = as(longleaf, "SpatialPointsDataFrame")
 llgrd = SpatialPoints(makegrid(ll, 100))
-gridded(llgrd)=TRUE
+gridded(llgrd) = TRUE
 ll.agg = aggregate(ll, llgrd, sum)
 names(ll.agg) = "sum"
 ll.agg$mean = aggregate(ll, llgrd, mean)[[1]] * 5
@@ -59,20 +60,20 @@ spl =list("sp.points", ll,cex=ll[[1]]/30,pch=1, col='grey')
 na = c("grid cell mean (x 5)", "grid cell sum")
 spplot(ll.agg[c("mean", "sum")], sp.layout=spl, col.regions=bpy.colors(),
     names.attr = na, main = "tree diameters")
-ll = as(as(longleaf, "SpatialPointsDataFrame"), "PointPatternDataFrame")
-
+ll = SObjects(ll, as(llgrd, "SpatialPolygons"))
 
 # with warnings:
-ll.agg.mean <- aggregate(ll, llgrd, mean)
+ll.agg.mean <- aggregate(ll, SLattice(llgrd), mean)
 # without warnings:
-ll.agg.sum = aggregate(ll, llgrd, sum)
+ll.agg.sum = aggregate(ll, SLattice(llgrd), sum)
 
 ### 3.2 aggregation of meuse data
-meuse.points = as(meuse[1:2], "GeostatisticalDataFrame")
 #str(meuse.points)
-meuse.target = SpatialPoints(makegrid(meuse.points, 10))
-gridded(meuse.target)=TRUE
+meuse.grd = SpatialPoints(makegrid(meuse, 10))
+gridded(meuse.grd) = TRUE
+meuse.target = SLattice(meuse.grd)
+meuse.points = SField(meuse[1:2], as(meuse.grd, "SpatialPolygons"))
 #with warnings
-ms.agg = aggregate(meuse.points,meuse.target, sum)
+ms.agg = aggregate(meuse.points, meuse.target, sum)
 #without warnings
 ms.agg = aggregate(meuse.points, meuse.target, mean)
