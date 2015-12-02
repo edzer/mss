@@ -42,7 +42,7 @@ aggregate.SObjects = function(x, by, FUN = mean, ...) {
 	if (isTRUE(obs_extends_window(by@observations, x@window)))
 		not_meaningful("aggregation over an area larger than the observation window")
 	if (!is.sum(FUN))
-		maybe_meaningful("aggregation using a non-sum function")
+		maybe_meaningful("for SObjects objects, aggregation using a non-sum function")
 	SLattice(aggregate(x@observations, by@observations, FUN = FUN, ...))
 }
 #' @rdname aggregate
