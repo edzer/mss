@@ -21,11 +21,9 @@ density.SObjects = function(x, bandwidth, newdata, ncells = 5000, ...) {
 			newdata = spsample(newdata, ncells, "regular")
 			gridded(newdata) = TRUE
 		}
-	} else {
-		stopifnot(is(newdata, "SField"))
+	} else if (is(newdata, "SField"))
 		newdata = newdata@observations
-		stopifnot(gridded(newdata))
-	}
+	stopifnot(gridded(newdata))
 	if (!requireNamespace("MASS", quietly = TRUE))
 		stop("package MASS required")
 
