@@ -8,7 +8,7 @@
 .mssOptions <- new.env(FALSE, globalenv())
 assign("mss_error", FALSE, envir = .mssOptions)
 
-#' @importFrom stats aggregate density
+#' @importFrom stats density
 #' @import methods
 #' @import sp 
 #' @import spacetime
