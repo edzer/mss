@@ -35,3 +35,6 @@ f = f4x4(2)
 f() # centered at (0,0)
 f(10,5) # centered at (10,5)
 ```
+
+# Wed Dec  9 11:05:02 CET 2015
+density only works with gridded (field) as newdata.

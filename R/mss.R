@@ -11,6 +11,8 @@ assign("mss_error", FALSE, envir = .mssOptions)
 #' @importFrom stats aggregate density
 #' @import methods
 #' @import sp 
+#' @import spacetime
+#' @import trajectories
 NULL
 
 #' assign whether non-meaningful actions should result in an error

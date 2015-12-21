@@ -9,7 +9,7 @@ Authors@R: c(person("Edzer", "Pebesma", role = c("cre", "aut"),
 Depends:
     methods
 Imports:
-    sp (>= 1.0-17)
+    sp (>= 1.0-17), spacetime, trajectories
 Suggests:
     rgeos,
     gstat (>= 1.0-20),
